@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0" version="24.8.0">
+  <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
+    <mxGraphModel dx="1426" dy="827" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-5" value="&lt;div&gt;Atmospheric&lt;/div&gt;&lt;div&gt;+&lt;/div&gt;&lt;div&gt;Temperature data&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="WIyWlLk6GJQsqaUBKTNV-3" target="ZddS-kG7b56K9njp8Zyi-1" edge="1">
+          <mxGeometry x="-0.5" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-3" value="BMP280" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;glass=0;strokeWidth=1;shadow=0;perimeterSpacing=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry y="75" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-6" value="GPS data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZddS-kG7b56K9njp8Zyi-0" target="ZddS-kG7b56K9njp8Zyi-1" edge="1">
+          <mxGeometry x="-0.6364" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="175" />
+              <mxPoint x="180" y="100" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZddS-kG7b56K9njp8Zyi-0" value="PA1616D" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;glass=0;strokeWidth=1;shadow=0;perimeterSpacing=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry y="150" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-16" value="Altitude&lt;div&gt;+&lt;/div&gt;&lt;div&gt;Sensor data&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZddS-kG7b56K9njp8Zyi-1" target="ZddS-kG7b56K9njp8Zyi-8" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-17" value="Altitude&lt;div&gt;+&lt;/div&gt;&lt;div&gt;Sensor data&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZddS-kG7b56K9njp8Zyi-1" target="ZddS-kG7b56K9njp8Zyi-9" edge="1">
+          <mxGeometry x="0.2308" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZddS-kG7b56K9njp8Zyi-1" value="ESP32-WROOM-32E" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="280" y="60" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ZddS-kG7b56K9njp8Zyi-8" value="SD Card" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="520" y="75" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="ZddS-kG7b56K9njp8Zyi-9" target="ZddS-kG7b56K9njp8Zyi-13" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZddS-kG7b56K9njp8Zyi-9" value="&lt;span id=&quot;docs-internal-guid-a24bb074-7fff-e90d-af57-3e8982e29cc5&quot;&gt;&lt;span style=&quot;font-family: Calibri, sans-serif; background-color: transparent; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-variant-position: normal; vertical-align: baseline; white-space-collapse: preserve;&quot;&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;Ra-02 LoRa Radio&lt;/font&gt;&lt;/span&gt;&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="390" y="150" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ZddS-kG7b56K9njp8Zyi-13" value="Ground Station" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="520" y="150" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-4" value="Acceleration and tilt data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="6dIhgMCT2nIf_JV66kZ2-0" target="ZddS-kG7b56K9njp8Zyi-1" edge="1">
+          <mxGeometry x="-0.1273" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="320" y="25" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-0" value="LSM9DS1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;glass=0;strokeWidth=1;shadow=0;perimeterSpacing=0;fillColor=#f8cecc;strokeColor=#b85450;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-14" value="Energy generation data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="6dIhgMCT2nIf_JV66kZ2-10" target="ZddS-kG7b56K9njp8Zyi-1" edge="1">
+          <mxGeometry x="-0.122" relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="320" y="25" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6dIhgMCT2nIf_JV66kZ2-10" value="Voltage&lt;div&gt;Divider&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;glass=0;strokeWidth=1;shadow=0;perimeterSpacing=0;fillColor=#f8cecc;strokeColor=#b85450;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="520" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="HHyr0bV_yPxWWzBzBc3x-1" value="Air humidity data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="HHyr0bV_yPxWWzBzBc3x-0" target="ZddS-kG7b56K9njp8Zyi-1" edge="1">
+          <mxGeometry x="-0.6364" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="175" />
+              <mxPoint x="180" y="100" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="HHyr0bV_yPxWWzBzBc3x-0" value="HDC1080DMBR" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;glass=0;strokeWidth=1;shadow=0;perimeterSpacing=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="280" y="150" width="100" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
