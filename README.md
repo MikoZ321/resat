@@ -18,7 +18,10 @@ The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will 
 * FM-3510RGBA - RGB led, used to indicate the current mode of the CanSat
 
 ## Setup Process
-1. This project was coded in Arduino IDE using the esp32 board library by Espressif (for a step-by-step setup process consult the link https://dronebotworkshop.com/esp32-intro/)
+This project was coded in Arduino IDE using the esp32 board library by Espressif (for a step-by-step setup process consult the link https://dronebotworkshop.com/esp32-intro/)
+
+Libraries used:
+* [BME280 by Adafruit](https://github.com/adafruit/Adafruit_BME280_Library/tree/master) 
 
 ## Software Architecture and Design
 This project will consist of two main parts: 
