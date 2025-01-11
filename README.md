@@ -8,7 +8,7 @@ This project will use two seperate microcontrollers: one onboard the CanSat and 
 The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will be connected to the following peripherals:
 * BME280 - temperature, atmospheric pressure, and air humidity sensor
 * M10Q GPS QMC5883 - GPS module
-* LSM9DS1 - accelerometer, and tilt sensor
+* LSM9DS1TR - accelerometer, and tilt sensor
 * HX6659IUA-B - Hall effect sensor, used to determine the number of rotations of the parachute relative to the CanSat body
 * Voltage divider - voltage divider, used to determine the amount of energy produced
 * Ra-02 - LoRa communication module, used to transmit data to the ground station
@@ -22,7 +22,8 @@ This project was coded in Arduino IDE using the esp32 board library by Espressif
 
 Libraries used:
 * [BME280 by Adafruit](https://github.com/adafruit/Adafruit_BME280_Library/tree/master) 
-* [u-blox GNSS by SparkFun](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library)
+* [u-blox GNSS by SparkFun](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library) 
+* [Soldered-LSM9DS1TR-Arduino-Library](https://github.com/SolderedElectronics/Soldered-LSM9DS1TR-Arduino-Library/tree/main)
 
 ## Software Architecture and Design
 This project will consist of two main parts: 
