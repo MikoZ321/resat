@@ -22,6 +22,7 @@ This project was coded in Arduino IDE using the esp32 board library by Espressif
 
 Libraries used:
 * [BME280 by Adafruit](https://github.com/adafruit/Adafruit_BME280_Library/tree/master) 
+* [u-blox GNSS by SparkFun](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library)
 
 ## Software Architecture and Design
 This project will consist of two main parts: 
