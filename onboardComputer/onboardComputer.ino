@@ -1,3 +1,4 @@
+#include <Adafruit_ADS1X15.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
@@ -15,6 +16,9 @@ void printSensorData();
 
 // Pin definitions
 const uint8_t PIN_LED_STRIP = 26;
+const uint8_t ADC_MOTOR = 0;
+const uint8_t ADC_BATTERY = 1;
+const uint8_t ADC_PHOTORESISTOR = 2;
 
 const float SEA_LEVEL_PRESSURE_HPA = 1013.25;
 const unsigned int LED_COUNT = 4;
@@ -23,6 +27,7 @@ const unsigned int LED_COUNT = 4;
 const unsigned long DELAY_TIME = 1000;
 
 // Init objects to control peripherals
+Adafruit_ADS1115 ads; // I2C
 Adafruit_BME280 bme; // I2C
 Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
 LSM9DS1TR lsm; // I2C
@@ -43,6 +48,8 @@ void setup() {
     ledStrip.setPixelColor(pixel, ledStrip.Color(255, 0, 0));
   }
   ledStrip.show();
+
+  ads.begin();
 
   // default settings
   status = bme.begin(0x77);  
@@ -103,6 +110,12 @@ void getSensorData() {
   sensorData["magnetometerX"] = lsm.calcMag(lsm.mx);
   sensorData["magnetometerY"] = lsm.calcMag(lsm.my);
   sensorData["magnetometerZ"] = lsm.calcMag(lsm.mz);
+
+  // all data from ADS1115IDGSR not scaled
+  // TODO: change keys when updated to proper units
+  sensorData["motor"] = ads.readADC_SingleEnded(ADC_MOTOR);
+  sensorData["battery"] = ads.readADC_SingleEnded(ADC_BATTERY);
+  sensorData["lightLevel"] = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
 
   // read M10Q data
   // possible to also read altitude to compare with the calculated one

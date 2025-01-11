@@ -10,6 +10,7 @@ The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will 
 * M10Q GPS QMC5883 - GPS module
 * LSM9DS1TR - accelerometer, and tilt sensor
 * HX6659IUA-B - Hall effect sensor, used to determine the number of rotations of the parachute relative to the CanSat body
+* ADS1115IDGSR - external analog to digital convertor, used to get more accurate digital conversions from both voltage dividers and the photoresistor
 * Voltage divider - voltage divider, used to determine the amount of energy produced
 * Ra-02 - LoRa communication module, used to transmit data to the ground station
 * TF PUSH - TF card reader, used to write data to the micro-SD card onboard
@@ -25,6 +26,7 @@ Libraries used:
 * [u-blox GNSS by SparkFun](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library) 
 * [Soldered-LSM9DS1TR-Arduino-Library](https://github.com/SolderedElectronics/Soldered-LSM9DS1TR-Arduino-Library/tree/main)
 * [Adafruit NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)
+* [Adafruit ADS1X15](https://github.com/adafruit/Adafruit_ADS1X15)
 
 ## Software Architecture and Design
 This project will consist of two main parts: 
