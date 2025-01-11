@@ -1,6 +1,6 @@
-
-#include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <Adafruit_NeoPixel.h>
+#include <Adafruit_Sensor.h>
 #include <LSM9DS1TR-SOLDERED.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 #include <unordered_map>
@@ -13,18 +13,20 @@ using namespace std;
 void getSensorData();
 void printSensorData();
 
-Adafruit_BME280 bme; // I2C
-LSM9DS1TR lsm; // I2C
-SFE_UBLOX_GNSS gnss; // UART
-
 // Pin definitions
-const uint8_t PIN_LED_RED = 12;
-const uint8_t PIN_LED_GREEN = 14;
-const uint8_t PIN_LED_BLUE = 32;
-
+const uint8_t PIN_LED_STRIP = 26;
 
 const float SEA_LEVEL_PRESSURE_HPA = 1013.25;
+const unsigned int LED_COUNT = 4;
+
+// Customizable settings
 const unsigned long DELAY_TIME = 1000;
+
+// Init objects to control peripherals
+Adafruit_BME280 bme; // I2C
+Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
+LSM9DS1TR lsm; // I2C
+SFE_UBLOX_GNSS gnss; // UART
 
 unordered_map<char *, float> sensorData;
 
@@ -32,17 +34,15 @@ void setup() {
   // 115200 because of gps example
   Serial.begin(115200);
 
-  pinMode(PIN_LED_RED, OUTPUT);
-  pinMode(PIN_LED_GREEN, OUTPUT);
-  pinMode(PIN_LED_BLUE, OUTPUT);
-
-  // indicate that the CanSat is in low-power mode
-  analogWrite(PIN_LED_RED, 0);
-  analogWrite(PIN_LED_GREEN, 0);
-  analogWrite(PIN_LED_BLUE, 255);
-
   Wire.begin();
   bool status;
+
+  // show that the CanSat is powered on
+  ledStrip.begin();
+  for (int pixel = 0; pixel < LED_COUNT; pixel++) {
+    ledStrip.setPixelColor(pixel, ledStrip.Color(255, 0, 0));
+  }
+  ledStrip.show();
 
   // default settings
   status = bme.begin(0x77);  

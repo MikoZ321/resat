@@ -15,7 +15,7 @@ The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will 
 * TF PUSH - TF card reader, used to write data to the micro-SD card onboard
 * Servo micro 9g - microservo, used to free the parachute compartment
 * Buzzer 2700Hz - buzzer, used to help locate the CanSat after landing
-* FM-3510RGBA - RGB led, used to indicate the current mode of the CanSat
+* WS2812B (with 4 pixels) - LED strip, used to indicate the current mode of the CanSat
 
 ## Setup Process
 This project was coded in Arduino IDE using the esp32 board library by Espressif (for a step-by-step setup process consult the link https://dronebotworkshop.com/esp32-intro/)
@@ -24,6 +24,7 @@ Libraries used:
 * [BME280 by Adafruit](https://github.com/adafruit/Adafruit_BME280_Library/tree/master) 
 * [u-blox GNSS by SparkFun](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library) 
 * [Soldered-LSM9DS1TR-Arduino-Library](https://github.com/SolderedElectronics/Soldered-LSM9DS1TR-Arduino-Library/tree/main)
+* [Adafruit NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)
 
 ## Software Architecture and Design
 This project will consist of two main parts: 
