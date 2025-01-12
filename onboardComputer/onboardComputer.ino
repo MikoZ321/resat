@@ -3,6 +3,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
 #include <LSM9DS1TR-SOLDERED.h>
+#include <Servo.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 #include <unordered_map>
 #include <u-blox_config_keys.h>
@@ -16,19 +17,21 @@ bool isDescending();
 void printSensorData();
 
 // Pin definitions
+const uint8_t PIN_SERVO = 16;
 const uint8_t PIN_LED_STRIP = 26;
 const uint8_t PIN_HALL_SENSOR = 32;
 const uint8_t ADC_MOTOR = 0;
 const uint8_t ADC_BATTERY = 1;
 const uint8_t ADC_PHOTORESISTOR = 2;
 
-const float SEA_LEVEL_PRESSURE_HPA = 1013.25;
+const float SEA_LEVEL_PRESSURE = 1013.25; // [pressure] = hPa
 const unsigned int LED_COUNT = 4;
 
 // Customizable settings
-const unsigned int DELAY_TIME = 1000;
-const int MIN_ALTITUDE_DIFFERENCE = 5;
+const unsigned int DELAY_TIME = 1000; // [delay time] = ms
+const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
 const int MIN_LIGHT_LEVEL = 500;
+const int SERVO_ROTATION_ANGLE = 90; // [angle] = degrees
 
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
@@ -46,6 +49,8 @@ float previousAltitude = 0;
 void setup() {
   // 115200 because of gps example
   Serial.begin(115200);
+
+  servoMotor.attach(PIN_SERVO);
 
   Wire.begin();
   bool status;
@@ -90,6 +95,8 @@ void loop() {
   if (!currentMode && isDescending()) {
     currentMode = 1;
 
+    servoMotor.write(SERVO_ROTATION_ANGLE);
+
     for (int pixel = 0; pixel < LED_COUNT; pixel++) {
       ledStrip.setPixelColor(pixel, ledStrip.Color(0, 255, 0));
     }
@@ -112,7 +119,7 @@ void loop() {
 void getSensorData() {
   sensorData["temperature"] = bme.readTemperature(); // [temperature] = degrees Celcius
   sensorData["pressure"] = bme.readPressure(); // [pressure] = hPa
-  sensorData["altitude"] = bme.readAltitude(SEA_LEVEL_PRESSURE_HPA); // [altitude] = m
+  sensorData["altitude"] = bme.readAltitude(SEA_LEVEL_PRESSURE); // [altitude] = m
   sensorData["humidity"] = bme.readHumidity(); // [humidity] = %
 
   // possible to also read altitude to compare with the calculated one
