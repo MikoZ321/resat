@@ -11,7 +11,8 @@ The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will 
 * LSM9DS1TR - accelerometer, and tilt sensor
 * HX6659IUA-B - Hall effect sensor, used to determine the number of rotations of the parachute relative to the CanSat body
 * ADS1115IDGSR - external analog to digital convertor, used to get more accurate digital conversions from both voltage dividers and the photoresistor
-* Voltage divider - voltage divider, used to determine the amount of energy produced
+* Voltage dividers - two voltage divider, used to determine the amount of energy produced by the motor and the battery energy level
+* GL5516 - photoresistor, used to determine if the CanSat is in the rocket or outside
 * Ra-02 - LoRa communication module, used to transmit data to the ground station
 * TF PUSH - TF card reader, used to write data to the micro-SD card onboard
 * Servo micro 9g - microservo, used to free the parachute compartment

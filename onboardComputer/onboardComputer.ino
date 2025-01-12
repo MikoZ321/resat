@@ -12,10 +12,12 @@
 using namespace std;
 
 void getSensorData();
+bool isDescending();
 void printSensorData();
 
 // Pin definitions
 const uint8_t PIN_LED_STRIP = 26;
+const uint8_t PIN_HALL_SENSOR = 32;
 const uint8_t ADC_MOTOR = 0;
 const uint8_t ADC_BATTERY = 1;
 const uint8_t ADC_PHOTORESISTOR = 2;
@@ -24,7 +26,9 @@ const float SEA_LEVEL_PRESSURE_HPA = 1013.25;
 const unsigned int LED_COUNT = 4;
 
 // Customizable settings
-const unsigned long DELAY_TIME = 1000;
+const unsigned int DELAY_TIME = 1000;
+const int MIN_ALTITUDE_DIFFERENCE = 5;
+const int MIN_LIGHT_LEVEL = 500;
 
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
@@ -34,6 +38,10 @@ LSM9DS1TR lsm; // I2C
 SFE_UBLOX_GNSS gnss; // UART
 
 unordered_map<char *, float> sensorData;
+// 0 - low power mode, 1 - normal mode
+// always starts in low power mode
+int currentMode = 0;
+float previousAltitude = 0;
 
 void setup() {
   // 115200 because of gps example
@@ -45,7 +53,7 @@ void setup() {
   // show that the CanSat is powered on
   ledStrip.begin();
   for (int pixel = 0; pixel < LED_COUNT; pixel++) {
-    ledStrip.setPixelColor(pixel, ledStrip.Color(255, 0, 0));
+    ledStrip.setPixelColor(pixel, ledStrip.Color(0, 0, 255));
   }
   ledStrip.show();
 
@@ -75,53 +83,81 @@ void setup() {
 
 
 void loop() {
+  previousAltitude = sensorData["altitude"];
+
   getSensorData();
+
+  if (!currentMode && isDescending()) {
+    currentMode = 1;
+
+    for (int pixel = 0; pixel < LED_COUNT; pixel++) {
+      ledStrip.setPixelColor(pixel, ledStrip.Color(0, 255, 0));
+    }
+    ledStrip.show();
+  }
+  else if (currentMode && !isDescending()) {
+    currentMode = 0;
+
+    for (int pixel = 0; pixel < LED_COUNT; pixel++) {
+      ledStrip.setPixelColor(pixel, ledStrip.Color(0, 0, 255));
+    }
+    ledStrip.show();
+  }
+
   printSensorData();
   delay(DELAY_TIME);
 }
 
 
 void getSensorData() {
-  // read BME280 data
-  // [temperature] = degrees Celcius
-  sensorData["temperature"] = bme.readTemperature();
-  // [pressure] = hPa
-  sensorData["pressure"] = bme.readPressure();
-  // [altitude] = m
-  sensorData["altitude"] = bme.readAltitude(SEA_LEVEL_PRESSURE_HPA);
-  // [humidity] = %
-  sensorData["humidity"] = bme.readHumidity();
+  sensorData["temperature"] = bme.readTemperature(); // [temperature] = degrees Celcius
+  sensorData["pressure"] = bme.readPressure(); // [pressure] = hPa
+  sensorData["altitude"] = bme.readAltitude(SEA_LEVEL_PRESSURE_HPA); // [altitude] = m
+  sensorData["humidity"] = bme.readHumidity(); // [humidity] = %
 
-  // update lsm object with LSM9DS1TR data
-  // [gyro] = DPS
-  lsm.readGyro();
-  sensorData["gyroX"] = lsm.calcGyro(lsm.gx);
-  sensorData["gyroY"] = lsm.calcGyro(lsm.gy);
-  sensorData["gyroZ"] = lsm.calcGyro(lsm.gz);
-
-  // [acceleration] = g
-  lsm.readAccel();
-  sensorData["accelerationX"] = lsm.calcAccel(lsm.ax);
-  sensorData["accelerationY"] = lsm.calcAccel(lsm.ay);
-  sensorData["accelerationZ"] = lsm.calcAccel(lsm.az);
-
-  // [magnetometerData] = Gauss
-  lsm.readMag();
-  sensorData["magnetometerX"] = lsm.calcMag(lsm.mx);
-  sensorData["magnetometerY"] = lsm.calcMag(lsm.my);
-  sensorData["magnetometerZ"] = lsm.calcMag(lsm.mz);
-
-  // all data from ADS1115IDGSR not scaled
-  // TODO: change keys when updated to proper units
-  sensorData["motor"] = ads.readADC_SingleEnded(ADC_MOTOR);
-  sensorData["battery"] = ads.readADC_SingleEnded(ADC_BATTERY);
-  sensorData["lightLevel"] = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
-
-  // read M10Q data
   // possible to also read altitude to compare with the calculated one
   // [latitude] = [longitude] = degrees * 10^7
   sensorData["latitude"] = gnss.getLatitude();
   sensorData["longitude"] = gnss.getLongitude();
+  
+  // all data from ADS1115IDGSR not scaled
+  // TODO: make these readings useful
+  // TODO: change keys when updated to proper units
+  sensorData["battery"] = ads.readADC_SingleEnded(ADC_BATTERY);
+  sensorData["lightLevel"] = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
+
+  if (currentMode) {
+    // [gyro] = DPS
+    lsm.readGyro();
+    sensorData["gyroX"] = lsm.calcGyro(lsm.gx);
+    sensorData["gyroY"] = lsm.calcGyro(lsm.gy);
+    sensorData["gyroZ"] = lsm.calcGyro(lsm.gz);
+
+    // [acceleration] = g
+    lsm.readAccel();
+    sensorData["accelerationX"] = lsm.calcAccel(lsm.ax);
+    sensorData["accelerationY"] = lsm.calcAccel(lsm.ay);
+    sensorData["accelerationZ"] = lsm.calcAccel(lsm.az);
+
+    // [magnetometerData] = Gauss
+    lsm.readMag();
+    sensorData["magnetometerX"] = lsm.calcMag(lsm.mx);
+    sensorData["magnetometerY"] = lsm.calcMag(lsm.my);
+    sensorData["magnetometerZ"] = lsm.calcMag(lsm.mz);
+
+    // all data from ADS1115IDGSR not scaled
+    // TODO: make these readings useful
+    // TODO: change keys when updated to proper units
+    sensorData["motor"] = ads.readADC_SingleEnded(ADC_MOTOR);
+
+    // TODO: make Hall effect sensor actually useful
+    sensorData["hallEffect"] = analogRead(PIN_HALL_SENSOR);
+  }
+}
+
+
+bool isDescending() {
+  return (previousAltitude - sensorData["altitude"] > MIN_ALTITUDE_DIFFERENCE) && (sensorData["lightLevel"] > MIN_LIGHT_LEVEL);
 }
 
 
