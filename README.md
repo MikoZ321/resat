@@ -23,7 +23,7 @@ The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will 
 This project was coded in Arduino IDE using the esp32 board library by Espressif (for a step-by-step setup process consult the link https://dronebotworkshop.com/esp32-intro/)
 
 Libraries used:
-* [BME280 by Adafruit](https://github.com/adafruit/Adafruit_BME280_Library/tree/master) 
+* [BME280 by Tyler Glenn](https://github.com/finitespace/BME280/tree/master) 
 * [u-blox GNSS by SparkFun](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library) 
 * [Soldered-LSM9DS1TR-Arduino-Library](https://github.com/SolderedElectronics/Soldered-LSM9DS1TR-Arduino-Library/tree/main)
 * [Adafruit NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)

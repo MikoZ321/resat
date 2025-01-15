@@ -1,7 +1,8 @@
 #include <Adafruit_ADS1X15.h>
-#include <Adafruit_BME280.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
+#include <BME280I2C.h>
+#include <EnvironmentCalculations.h>
 #include <ESP32Servo.h>
 #include <LSM9DS1TR-SOLDERED.h>
 #include <SD.h>
@@ -21,18 +22,18 @@ struct vector3D{
 
 struct dataContainer{
   long tickCount;
-  float temperature;
-  float pressure;
-  float humidity;
-  float altitude;
-  long latitude;
-  long longitude;
+  float temperature; // [temperature] = degrees Celcius
+  float pressure; // [pressure] = hPa
+  float humidity; // [humidity] = % RH
+  float altitude; // [altitude] = m
+  long latitude; // [latitude] = degrees * 10^7
+  long longitude; // [longitude] = degrees * 10^7
   int lightLevel;
   float batteryVoltage;
   float motorOutputVoltage;
-  vector3D gyro;
-  vector3D acceleration;
-  vector3D magnetometer;
+  vector3D gyro; // [gyro] = DPS
+  vector3D acceleration; // [acceleration] = g
+  vector3D magnetometer; // [magnetometer] = Gauss
   float hallEffect;
 };
 
@@ -62,11 +63,11 @@ const int SERVO_ROTATION_ANGLE = 90; // [angle] = degree
 
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
-Adafruit_BME280 bme; // I2C
 Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
+BME280I2C bme; // I2C
 LSM9DS1TR lsm; // I2C
 SFE_UBLOX_GNSS gnss; // UART
-Servo myServo;
+Servo myServo; // PWM
 
 dataContainer sensorData;
 // 0 - low power mode, 1 - normal mode
@@ -162,13 +163,10 @@ string dataContainerToString(dataContainer input, string seperator) {
 
 
 void getSensorData() {
-  sensorData.temperature = bme.readTemperature(); // [temperature] = degrees Celcius
-  sensorData.pressure = bme.readPressure(); // [pressure] = hPa
-  sensorData.altitude = bme.readAltitude(SEA_LEVEL_PRESSURE); // [altitude] = m
-  sensorData.humidity = bme.readHumidity(); // [humidity] = %
+  bme.read(sensorData.pressure, sensorData.temperature, sensorData.humidity);
+  sensorData.altitude = EnvironmentCalculations::Altitude(sensorData.pressure);
 
   // possible to also read altitude to compare with the calculated one
-  // [latitude] = [longitude] = degrees * 10^7
   sensorData.latitude = gnss.getLatitude();
   sensorData.longitude = gnss.getLongitude();
   
@@ -179,19 +177,16 @@ void getSensorData() {
   sensorData.lightLevel = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
 
   if (currentMode) {
-    // [gyro] = DPS
     lsm.readGyro();
     sensorData.gyro.x = lsm.calcGyro(lsm.gx);
     sensorData.gyro.y = lsm.calcGyro(lsm.gy);
     sensorData.gyro.z = lsm.calcGyro(lsm.gz);
 
-    // [acceleration] = g
     lsm.readAccel();
     sensorData.acceleration.x = lsm.calcAccel(lsm.ax);
     sensorData.acceleration.y = lsm.calcAccel(lsm.ay);
     sensorData.acceleration.z = lsm.calcAccel(lsm.az);
 
-    // [magnetometerData] = Gauss
     lsm.readMag();
     sensorData.magnetometer.x = lsm.calcMag(lsm.mx);
     sensorData.magnetometer.y = lsm.calcMag(lsm.my);
