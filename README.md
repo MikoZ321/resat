@@ -8,10 +8,10 @@ This project will use two seperate microcontrollers: one onboard the CanSat and 
 The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will be connected to the following peripherals:
 * BME280 - temperature, atmospheric pressure, and air humidity sensor
 * M10Q GPS QMC5883 - GPS module
-* LSM9DS1TR - accelerometer, and tilt sensor
+* LSM9DS1TR - accelerometer, magnetometer, and gyroscope
 * HX6659IUA-B - Hall effect sensor, used to determine the number of rotations of the parachute relative to the CanSat body
 * ADS1115IDGSR - external analog to digital convertor, used to get more accurate digital conversions from both voltage dividers and the photoresistor
-* Voltage dividers - two voltage divider, used to determine the amount of energy produced by the motor and the battery energy level
+* Voltage dividers - two voltage dividers, used to determine the amount of energy produced by the motor and the battery energy level
 * GL5516 - photoresistor, used to determine if the CanSat is in the rocket or outside
 * Ra-02 - LoRa communication module, used to transmit data to the ground station
 * TF PUSH - TF card reader, used to write data to the micro-SD card onboard
