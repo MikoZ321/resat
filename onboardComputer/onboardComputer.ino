@@ -3,6 +3,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
 #include <LSM9DS1TR-SOLDERED.h>
+#include <SD.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 #include <string>
 #include <unordered_map>
@@ -19,6 +20,7 @@ struct vector3D{
 };
 
 struct dataContainer{
+  long tickCount;
   float temperature;
   float pressure;
   float humidity;
@@ -41,6 +43,7 @@ void printSensorData();
 string vector3DToString(vector3D input, string seperator);
 
 // Pin definitions
+const uint8_t PIN_SD_CS = 14;
 const uint8_t PIN_LED_STRIP = 26;
 const uint8_t PIN_HALL_SENSOR = 32;
 const uint8_t ADC_MOTOR = 0;
@@ -67,8 +70,10 @@ dataContainer sensorData;
 // always starts in low power mode
 int currentMode = 0;
 float previousAltitude = 0;
+File outputFile;
 
 void setup() {
+  sensorData.tickCount = 0;
   // 115200 because of gps example
   Serial.begin(115200);
 
@@ -81,6 +86,22 @@ void setup() {
     ledStrip.setPixelColor(pixel, ledStrip.Color(0, 0, 255));
   }
   ledStrip.show();
+
+  status = SD.begin(PIN_SD_CS);
+  if (!status) {
+    Serial.println("Could not connect to SD card.");
+    while (1);
+  }
+
+  if (!SD.exists("/output.csv")) {
+    outputFile = SD.open("/output.csv", FILE_WRITE);
+
+    outputFile.print("tickCount;temperature;pressure;humidity;altitude;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
+    outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;magnetometerX;magnetometerY;magnetometerZ;hallEffect");
+
+    outputFile.close();
+  }
+  
 
   ads.begin();
 
@@ -108,6 +129,7 @@ void setup() {
 
 
 void loop() {
+  sensorData.tickCount++;
   previousAltitude = sensorData.altitude;
 
   getSensorData();
@@ -129,6 +151,11 @@ void loop() {
     ledStrip.show();
   }
 
+  // write data to SD 
+  outputFile = SD.open("/output.csv", FILE_WRITE);
+  outputFile.println(dataContainerToString(sensorData, ";").c_str());
+  outputFile.close();
+
   printSensorData();
   delay(DELAY_TIME);
 }
@@ -136,8 +163,9 @@ void loop() {
 
 // this is a mess will try to fix
 string dataContainerToString(dataContainer input, string seperator) {
-  return (to_string(sensorData.temperature) + seperator + to_string(sensorData.pressure) + seperator + to_string(sensorData.humidity) + seperator + to_string(sensorData.altitude) + seperator +
-          to_string(sensorData.latitude) + seperator + to_string(sensorData.longitude) + seperator + to_string(sensorData.lightLevel) + seperator + to_string(sensorData.batteryVoltage) + seperator + 
+  return (to_string(sensorData.tickCount) + seperator + to_string(sensorData.temperature) + seperator + to_string(sensorData.pressure) + seperator + 
+          to_string(sensorData.humidity) + seperator + to_string(sensorData.altitude) + seperator + to_string(sensorData.latitude) + seperator + 
+          to_string(sensorData.longitude) + seperator + to_string(sensorData.lightLevel) + seperator + to_string(sensorData.batteryVoltage) + seperator + 
           to_string(sensorData.motorOutputVoltage) + seperator + vector3DToString(sensorData.gyro, seperator) + seperator + vector3DToString(sensorData.acceleration, seperator) + seperator +
           vector3DToString(sensorData.magnetometer, seperator) + seperator + to_string(sensorData.hallEffect));
 }
