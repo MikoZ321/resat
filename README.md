@@ -28,6 +28,7 @@ Libraries used:
 * [Soldered-LSM9DS1TR-Arduino-Library](https://github.com/SolderedElectronics/Soldered-LSM9DS1TR-Arduino-Library/tree/main)
 * [Adafruit NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)
 * [Adafruit ADS1X15](https://github.com/adafruit/Adafruit_ADS1X15)
+* [ESP32Servo](https://madhephaestus.github.io/ESP32Servo/classServo.html)
 
 ## Software Architecture and Design
 This project will consist of two main parts: 

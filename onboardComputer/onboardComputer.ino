@@ -2,6 +2,7 @@
 #include <Adafruit_BME280.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
+#include <ESP32Servo.h>
 #include <LSM9DS1TR-SOLDERED.h>
 #include <SD.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
@@ -43,6 +44,7 @@ string vector3DToString(vector3D input, string seperator);
 
 // Pin definitions
 const uint8_t PIN_SD_CS = 14;
+const uint8_t PIN_SERVO = 16;
 const uint8_t PIN_LED_STRIP = 26;
 const uint8_t PIN_HALL_SENSOR = 32;
 const uint8_t ADC_MOTOR = 0;
@@ -56,6 +58,7 @@ const unsigned int LED_COUNT = 4;
 const unsigned int DELAY_TIME = 1000; // [delay time] = ms
 const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
 const int MIN_LIGHT_LEVEL = 500;
+const int SERVO_ROTATION_ANGLE = 90; // [angle] = degree
 
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
@@ -63,6 +66,7 @@ Adafruit_BME280 bme; // I2C
 Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
 LSM9DS1TR lsm; // I2C
 SFE_UBLOX_GNSS gnss; // UART
+Servo myServo;
 
 dataContainer sensorData;
 // 0 - low power mode, 1 - normal mode
@@ -84,6 +88,7 @@ void setup() {
   }
   ledStrip.show();
 
+  myServo.attach(PIN_SERVO);
   
   SD.begin(PIN_SD_CS);
   if (!SD.exists("/output.csv")) {
@@ -118,6 +123,9 @@ void loop() {
 
   if (!currentMode && isDescending()) {
     currentMode = 1;
+
+    // deploy parachute and blades
+    myServo.write(SERVO_ROTATION_ANGLE);
 
     for (int pixel = 0; pixel < LED_COUNT; pixel++) {
       ledStrip.setPixelColor(pixel, ledStrip.Color(0, 255, 0));
