@@ -3,8 +3,8 @@
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
 #include <LSM9DS1TR-SOLDERED.h>
-#include <Servo.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
+#include <string>
 #include <unordered_map>
 #include <u-blox_config_keys.h>
 #include <u-blox_structs.h>
@@ -12,12 +12,35 @@
 
 using namespace std;
 
-void getSensorData();
+struct vector3D{
+  float x;
+  float y;
+  float z;
+};
+
+struct dataContainer{
+  float temperature;
+  float pressure;
+  float humidity;
+  float altitude;
+  long latitude;
+  long longitude;
+  int lightLevel;
+  float batteryVoltage;
+  float motorOutputVoltage;
+  vector3D gyro;
+  vector3D acceleration;
+  vector3D magnetometer;
+  float hallEffect;
+};
+
+string dataContainerToString(dataContainer input, string seperator);
+void getSensorData();  
 bool isDescending();
 void printSensorData();
+string vector3DToString(vector3D input, string seperator);
 
 // Pin definitions
-const uint8_t PIN_SERVO = 16;
 const uint8_t PIN_LED_STRIP = 26;
 const uint8_t PIN_HALL_SENSOR = 32;
 const uint8_t ADC_MOTOR = 0;
@@ -31,7 +54,6 @@ const unsigned int LED_COUNT = 4;
 const unsigned int DELAY_TIME = 1000; // [delay time] = ms
 const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
 const int MIN_LIGHT_LEVEL = 500;
-const int SERVO_ROTATION_ANGLE = 90; // [angle] = degrees
 
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
@@ -40,7 +62,7 @@ Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
 LSM9DS1TR lsm; // I2C
 SFE_UBLOX_GNSS gnss; // UART
 
-unordered_map<char *, float> sensorData;
+dataContainer sensorData;
 // 0 - low power mode, 1 - normal mode
 // always starts in low power mode
 int currentMode = 0;
@@ -49,8 +71,6 @@ float previousAltitude = 0;
 void setup() {
   // 115200 because of gps example
   Serial.begin(115200);
-
-  servoMotor.attach(PIN_SERVO);
 
   Wire.begin();
   bool status;
@@ -88,14 +108,12 @@ void setup() {
 
 
 void loop() {
-  previousAltitude = sensorData["altitude"];
+  previousAltitude = sensorData.altitude;
 
   getSensorData();
 
   if (!currentMode && isDescending()) {
     currentMode = 1;
-
-    servoMotor.write(SERVO_ROTATION_ANGLE);
 
     for (int pixel = 0; pixel < LED_COUNT; pixel++) {
       ledStrip.setPixelColor(pixel, ledStrip.Color(0, 255, 0));
@@ -116,63 +134,73 @@ void loop() {
 }
 
 
+// this is a mess will try to fix
+string dataContainerToString(dataContainer input, string seperator) {
+  return (to_string(sensorData.temperature) + seperator + to_string(sensorData.pressure) + seperator + to_string(sensorData.humidity) + seperator + to_string(sensorData.altitude) + seperator +
+          to_string(sensorData.latitude) + seperator + to_string(sensorData.longitude) + seperator + to_string(sensorData.lightLevel) + seperator + to_string(sensorData.batteryVoltage) + seperator + 
+          to_string(sensorData.motorOutputVoltage) + seperator + vector3DToString(sensorData.gyro, seperator) + seperator + vector3DToString(sensorData.acceleration, seperator) + seperator +
+          vector3DToString(sensorData.magnetometer, seperator) + seperator + to_string(sensorData.hallEffect));
+}
+
+
 void getSensorData() {
-  sensorData["temperature"] = bme.readTemperature(); // [temperature] = degrees Celcius
-  sensorData["pressure"] = bme.readPressure(); // [pressure] = hPa
-  sensorData["altitude"] = bme.readAltitude(SEA_LEVEL_PRESSURE); // [altitude] = m
-  sensorData["humidity"] = bme.readHumidity(); // [humidity] = %
+  sensorData.temperature = bme.readTemperature(); // [temperature] = degrees Celcius
+  sensorData.pressure = bme.readPressure(); // [pressure] = hPa
+  sensorData.altitude = bme.readAltitude(SEA_LEVEL_PRESSURE); // [altitude] = m
+  sensorData.humidity = bme.readHumidity(); // [humidity] = %
 
   // possible to also read altitude to compare with the calculated one
   // [latitude] = [longitude] = degrees * 10^7
-  sensorData["latitude"] = gnss.getLatitude();
-  sensorData["longitude"] = gnss.getLongitude();
+  sensorData.latitude = gnss.getLatitude();
+  sensorData.longitude = gnss.getLongitude();
   
   // all data from ADS1115IDGSR not scaled
   // TODO: make these readings useful
   // TODO: change keys when updated to proper units
-  sensorData["battery"] = ads.readADC_SingleEnded(ADC_BATTERY);
-  sensorData["lightLevel"] = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
+  sensorData.batteryVoltage = ads.readADC_SingleEnded(ADC_BATTERY);
+  sensorData.lightLevel = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
 
   if (currentMode) {
     // [gyro] = DPS
     lsm.readGyro();
-    sensorData["gyroX"] = lsm.calcGyro(lsm.gx);
-    sensorData["gyroY"] = lsm.calcGyro(lsm.gy);
-    sensorData["gyroZ"] = lsm.calcGyro(lsm.gz);
+    sensorData.gyro.x = lsm.calcGyro(lsm.gx);
+    sensorData.gyro.y = lsm.calcGyro(lsm.gy);
+    sensorData.gyro.z = lsm.calcGyro(lsm.gz);
 
     // [acceleration] = g
     lsm.readAccel();
-    sensorData["accelerationX"] = lsm.calcAccel(lsm.ax);
-    sensorData["accelerationY"] = lsm.calcAccel(lsm.ay);
-    sensorData["accelerationZ"] = lsm.calcAccel(lsm.az);
+    sensorData.acceleration.x = lsm.calcAccel(lsm.ax);
+    sensorData.acceleration.y = lsm.calcAccel(lsm.ay);
+    sensorData.acceleration.z = lsm.calcAccel(lsm.az);
 
     // [magnetometerData] = Gauss
     lsm.readMag();
-    sensorData["magnetometerX"] = lsm.calcMag(lsm.mx);
-    sensorData["magnetometerY"] = lsm.calcMag(lsm.my);
-    sensorData["magnetometerZ"] = lsm.calcMag(lsm.mz);
+    sensorData.magnetometer.x = lsm.calcMag(lsm.mx);
+    sensorData.magnetometer.y = lsm.calcMag(lsm.my);
+    sensorData.magnetometer.z = lsm.calcMag(lsm.mz);
 
     // all data from ADS1115IDGSR not scaled
     // TODO: make these readings useful
     // TODO: change keys when updated to proper units
-    sensorData["motor"] = ads.readADC_SingleEnded(ADC_MOTOR);
+    sensorData.motorOutputVoltage = ads.readADC_SingleEnded(ADC_MOTOR);
 
     // TODO: make Hall effect sensor actually useful
-    sensorData["hallEffect"] = analogRead(PIN_HALL_SENSOR);
+    sensorData.hallEffect = analogRead(PIN_HALL_SENSOR);
   }
 }
 
 
 bool isDescending() {
-  return (previousAltitude - sensorData["altitude"] > MIN_ALTITUDE_DIFFERENCE) && (sensorData["lightLevel"] > MIN_LIGHT_LEVEL);
+  return (previousAltitude - sensorData.altitude > MIN_ALTITUDE_DIFFERENCE) && (sensorData.lightLevel > MIN_LIGHT_LEVEL);
 }
 
 
-// function only for testing will have no use in final code
+// function only for testing will have no use in final code, temporary solution will be fixed soon
 void printSensorData() {
-  for (auto& [key, value]: sensorData) {
-    Serial.print(key);
-    Serial.print(": ");
-    Serial.println(value);
-  }
+  Serial.print(sensorData.temperature);
+}
+
+
+string vector3DToString(vector3D input, string seperator) {
+  return (to_string(input.x) + seperator + to_string(input.y) + seperator + to_string(input.z));
 }
