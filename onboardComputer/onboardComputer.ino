@@ -6,7 +6,6 @@
 #include <SD.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 #include <string>
-#include <unordered_map>
 #include <u-blox_config_keys.h>
 #include <u-blox_structs.h>
 #include <Wire.h>
@@ -76,9 +75,7 @@ void setup() {
   sensorData.tickCount = 0;
   // 115200 because of gps example
   Serial.begin(115200);
-
   Wire.begin();
-  bool status;
 
   // show that the CanSat is powered on
   ledStrip.begin();
@@ -87,40 +84,25 @@ void setup() {
   }
   ledStrip.show();
 
-  status = SD.begin(PIN_SD_CS);
-  if (!status) {
-    Serial.println("Could not connect to SD card.");
-    while (1);
-  }
-
+  
+  SD.begin(PIN_SD_CS);
   if (!SD.exists("/output.csv")) {
     outputFile = SD.open("/output.csv", FILE_WRITE);
 
+    // init header
     outputFile.print("tickCount;temperature;pressure;humidity;altitude;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
     outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;magnetometerX;magnetometerY;magnetometerZ;hallEffect");
 
     outputFile.close();
   }
   
-
+  // init I2C for all peripherals
   ads.begin();
-
-  // default settings
-  status = bme.begin(0x77);  
-  if (!status) {
-    Serial.println("Could not find a valid BME280 sensor.");
-    // potentially dangerous if the BME280 gets damaged and the microcontroller restarts it won't be able function
-    while (1);
-  }
-
-  status = lsm.begin();
-  if (!status) {
-    Serial.println("Could not connect to LSM9DS1TR.");
-    while (1);
-  }
+  bme.begin();
+  lsm.begin();
 
   // M10Q GPS is connected to UART 0
-  status = gnss.begin(Serial);
+  gnss.begin(Serial);
 
   gnss.setUART1Output(COM_TYPE_UBX); //Set the UART port to output UBX only
   gnss.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
@@ -152,7 +134,7 @@ void loop() {
   }
 
   // write data to SD 
-  outputFile = SD.open("/output.csv", FILE_WRITE);
+  outputFile = SD.open("/output.csv", FILE_APPEND);
   outputFile.println(dataContainerToString(sensorData, ";").c_str());
   outputFile.close();
 
@@ -225,7 +207,7 @@ bool isDescending() {
 
 // function only for testing will have no use in final code, temporary solution will be fixed soon
 void printSensorData() {
-  Serial.print(sensorData.temperature);
+  Serial.println(dataContainerToString(sensorData, ";").c_str());
 }
 
 
