@@ -11,6 +11,8 @@
 #include <u-blox_config_keys.h>
 #include <u-blox_structs.h>
 #include <Wire.h>
+#include <LoRa.h>
+#include <SPI.h>
 
 using namespace std;
 
@@ -51,6 +53,9 @@ const uint8_t PIN_HALL_SENSOR = 32;
 const uint8_t ADC_MOTOR = 0;
 const uint8_t ADC_BATTERY = 1;
 const uint8_t ADC_PHOTORESISTOR = 2;
+const uint8_t PIN_CS_LORA = 5;
+const uint8_t PIN_RESET_LORA = 17;
+const uint8_t PIN_DIO0_LORA = 2;
 
 const float SEA_LEVEL_PRESSURE = 1013.25; // [pressure] = hPa
 const unsigned int LED_COUNT = 4;
@@ -113,6 +118,15 @@ void setup() {
   gnss.setUART1Output(COM_TYPE_UBX); //Set the UART port to output UBX only
   gnss.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
   gnss.saveConfiguration(); //Save the current settings to flash and BBR
+
+  //Comunication Setup
+  LoRa.setPins(PIN_CS_LORA, PIN_RESET_LORA, PIN_DIO0_LORA);
+
+  if (!LoRa.begin(433E6)){
+    Serial.println("Starting LoRa failed!");
+    while (1)
+      ;
+  }
 }
 
 
@@ -149,6 +163,11 @@ void loop() {
 
   printSensorData();
   delay(DELAY_TIME);
+
+  // send data
+  LoRa.beginPacket();
+  LoRa.print(dataContainerToString(sensorData, ";").c_str());
+  LoRa.endPacket();
 }
 
 

@@ -29,6 +29,7 @@ Libraries used:
 * [Adafruit NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)
 * [Adafruit ADS1X15](https://github.com/adafruit/Adafruit_ADS1X15)
 * [ESP32Servo](https://madhephaestus.github.io/ESP32Servo/classServo.html)
+* [Lora by Sandeep Mistry](https://github.com/sandeepmistry/arduino-LoRa)
 
 ## Software Architecture and Design
 This project will consist of two main parts: 
