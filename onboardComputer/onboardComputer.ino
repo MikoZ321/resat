@@ -35,10 +35,11 @@ struct dataContainer {
   vector3D gyro; // [gyro] = DPS
   vector3D acceleration; // [acceleration] = g
   vector3D magnetometer; // [magnetometer] = Gauss
-  float hallEffect;
+  float angularSpeed; // [angular speed] = RPM
 };
 
 string dataContainerToString(dataContainer input, string seperator);
+float getAngularSpeed();
 void getSensorData();  
 bool isDescending();
 void printSensorData();
@@ -82,6 +83,7 @@ dataContainer sensorData;
 // 0 - low power mode, 1 - normal mode
 // always starts in low power mode
 int currentMode = 0;
+unsigned long currentTime = 0;
 float previousAltitude = 0;
 File outputFile;
 
@@ -132,10 +134,13 @@ void setup() {
 
 
 void loop() {
+  currentTime = millis();
   sensorData.tickCount++;
   previousAltitude = sensorData.altitude;
 
   getSensorData();
+
+  sensorData.angularSpeed = getAngularSpeed();
 
   if (!currentMode && isDescending()) {
     currentMode = 1;
@@ -170,7 +175,10 @@ void loop() {
   LoRa.endPacket();
 
   printSensorData();
-  delay(DELAY_TIME);
+  
+  while(millis() % DELAY_TIME) {
+    ;
+  }
 }
 
 
@@ -180,7 +188,27 @@ string dataContainerToString(dataContainer input, string seperator) {
           to_string(sensorData.humidity) + seperator + to_string(sensorData.altitude) + seperator + to_string(sensorData.latitude) + seperator + 
           to_string(sensorData.longitude) + seperator + to_string(sensorData.lightLevel) + seperator + to_string(sensorData.batteryVoltage) + seperator + 
           to_string(sensorData.motorOutputVoltage) + seperator + vector3DToString(sensorData.gyro, seperator) + seperator + vector3DToString(sensorData.acceleration, seperator) + seperator +
-          vector3DToString(sensorData.magnetometer, seperator) + seperator + to_string(sensorData.hallEffect));
+          vector3DToString(sensorData.magnetometer, seperator) + seperator + to_string(sensorData.angularSpeed));
+}
+
+
+float getAngularSpeed() {
+  const int MIN_HALL_EFFECT = 2070;
+  int revolutions = 0;
+  bool peak = false;
+
+  while (revolutions < 5 && (millis() - currentTime) % 1000 < 900) {
+    float sensorData = analogRead(PIN_HALL_SENSOR);
+    if (sensorData > MIN_HALL_EFFECT && !peak) {
+      peak = true;
+      revolutions++;
+    }
+
+    if (sensorData < MIN_HALL_EFFECT) {
+      peak = false;
+    }
+  }
+  return (60000.0/((millis() - currentTime) / 5.0)) * (revolutions == 5);
 }
 
 
@@ -226,9 +254,6 @@ void getSensorData() {
   sensorData.magnetometer.z = lsm.calcMag(lsm.mz);
 
   sensorData.motorOutputVoltage = ((ads.readADC_SingleEnded(ADC_MOTOR) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / MOTOR_DIVIDER_RATIO;
-
-  // TODO: make Hall effect sensor actually useful
-  sensorData.hallEffect = analogRead(PIN_HALL_SENSOR);
 }
 
 
