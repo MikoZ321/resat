@@ -48,6 +48,7 @@ string vector3DToString(vector3D input, string seperator);
 const uint8_t ADC_BATTERY = 1;
 const uint8_t ADC_MOTOR = 0;
 const uint8_t ADC_PHOTORESISTOR = 2;
+const uint8_t PIN_BUZZER = 25;
 const uint8_t PIN_HALL_SENSOR = 32;
 const uint8_t PIN_LED_STRIP = 26;
 const uint8_t PIN_LORA_CS = 5;
@@ -124,6 +125,9 @@ void setup() {
   lsm.begin();
 
   ads.setGain(GAIN_TWOTHIRDS);
+
+  pinMode(PIN_HALL_SENSOR, INPUT);
+  pinMode(PIN_BUZZER, OUTPUT);
 }
 
 
@@ -146,6 +150,8 @@ void loop() {
   }
   else if (currentMode && !isDescending()) {
     currentMode = 0;
+
+    digitalWrite(PIN_BUZZER, HIGH);
 
     for (int pixel = 0; pixel < LED_COUNT; pixel++) {
       ledStrip.setPixelColor(pixel, ledStrip.Color(0, 0, 255));
