@@ -7,29 +7,28 @@
 #include <LoRa.h>
 #include <LSM9DS1TR-SOLDERED.h>
 #include <SD.h>
-#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
+#include <SparkFun_I2C_GPS_Arduino_Library.h>
 #include <SPI.h>
 #include <string>
-#include <u-blox_config_keys.h>
-#include <u-blox_structs.h>
+#include <TinyGPS++.h>
 #include <Wire.h>
 
 using namespace std;
 
-struct vector3D{
+struct vector3D {
   float x;
   float y;
   float z;
 };
 
-struct dataContainer{
+struct dataContainer {
   long tickCount;
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
   float humidity; // [humidity] = % RH
   float altitude; // [altitude] = m
-  long latitude; // [latitude] = degrees * 10^7
-  long longitude; // [longitude] = degrees * 10^7
+  float latitude; // [latitude] = degrees N
+  float longitude; // [longitude] = degrees E
   int lightLevel;
   float batteryVoltage; // [voltage] = V
   float motorOutputVoltage; // [voltage] = V
@@ -74,7 +73,8 @@ Adafruit_ADS1115 ads; // I2C
 Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
 BME280I2C bme; // I2C
 LSM9DS1TR lsm; // I2C
-SFE_UBLOX_GNSS gnss; // UART
+I2CGPS gpsConnection; // I2C
+TinyGPSPlus gps;
 Servo myServo; // PWM
 
 dataContainer sensorData;
@@ -120,16 +120,10 @@ void setup() {
   // init I2C for all peripherals
   ads.begin();
   bme.begin();
+  gpsConnection.begin();
   lsm.begin();
 
   ads.setGain(GAIN_TWOTHIRDS);
-
-  // M10Q GPS is connected to UART 0
-  gnss.begin(Serial);
-
-  gnss.setUART1Output(COM_TYPE_UBX); //Set the UART port to output UBX only
-  gnss.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
-  gnss.saveConfiguration(); //Save the current settings to flash and BBR
 }
 
 
@@ -186,11 +180,18 @@ string dataContainerToString(dataContainer input, string seperator) {
 
 void getSensorData() {
   bme.read(sensorData.pressure, sensorData.temperature, sensorData.humidity);
-  sensorData.altitude = EnvironmentCalculations::Altitude(sensorData.pressure);
 
-  // possible to also read altitude to compare with the calculated one
-  sensorData.latitude = gnss.getLatitude();
-  sensorData.longitude = gnss.getLongitude();
+  gps.encode(gpsConnection.read());
+
+  sensorData.latitude = gps.location.lat();
+  sensorData.longitude = gps.location.lng();
+
+  if (gps.altitude.isValid()) {
+    sensorData.altitude = gps.altitude.meters();
+  }
+  else {
+    sensorData.altitude = EnvironmentCalculations::Altitude(sensorData.pressure);
+  }
   
   sensorData.batteryVoltage = ((ads.readADC_SingleEnded(ADC_BATTERY) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / BATTERY_DIVIDER_RATIO;
   sensorData.lightLevel = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
