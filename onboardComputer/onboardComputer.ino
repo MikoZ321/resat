@@ -4,15 +4,15 @@
 #include <BME280I2C.h>
 #include <EnvironmentCalculations.h>
 #include <ESP32Servo.h>
+#include <LoRa.h>
 #include <LSM9DS1TR-SOLDERED.h>
 #include <SD.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
+#include <SPI.h>
 #include <string>
 #include <u-blox_config_keys.h>
 #include <u-blox_structs.h>
 #include <Wire.h>
-#include <LoRa.h>
-#include <SPI.h>
 
 using namespace std;
 
@@ -31,8 +31,8 @@ struct dataContainer{
   long latitude; // [latitude] = degrees * 10^7
   long longitude; // [longitude] = degrees * 10^7
   int lightLevel;
-  float batteryVoltage;
-  float motorOutputVoltage;
+  float batteryVoltage; // [voltage] = V
+  float motorOutputVoltage; // [voltage] = V
   vector3D gyro; // [gyro] = DPS
   vector3D acceleration; // [acceleration] = g
   vector3D magnetometer; // [magnetometer] = Gauss
@@ -46,19 +46,22 @@ void printSensorData();
 string vector3DToString(vector3D input, string seperator);
 
 // Pin definitions
+const uint8_t ADC_BATTERY = 1;
+const uint8_t ADC_MOTOR = 0;
+const uint8_t ADC_PHOTORESISTOR = 2;
+const uint8_t PIN_HALL_SENSOR = 32;
+const uint8_t PIN_LED_STRIP = 26;
+const uint8_t PIN_LORA_CS = 5;
+const uint8_t PIN_LORA_DIO0 = 2;
+const uint8_t PIN_LORA_RESET = 17;
 const uint8_t PIN_SD_CS = 14;
 const uint8_t PIN_SERVO = 16;
-const uint8_t PIN_LED_STRIP = 26;
-const uint8_t PIN_HALL_SENSOR = 32;
-const uint8_t ADC_MOTOR = 0;
-const uint8_t ADC_BATTERY = 1;
-const uint8_t ADC_PHOTORESISTOR = 2;
-const uint8_t PIN_CS_LORA = 5;
-const uint8_t PIN_RESET_LORA = 17;
-const uint8_t PIN_DIO0_LORA = 2;
 
-const float SEA_LEVEL_PRESSURE = 1013.25; // [pressure] = hPa
 const unsigned int LED_COUNT = 4;
+const float ADC_VOLTAGE_RANGE = 4.096; // [voltage range] = V
+const float ADC_DIGITAL_RANGE = 32767.0;
+const float BATTERY_DIVIDER_RATIO = 10.0 / 37.0;
+const float MOTOR_DIVIDER_RATIO = 10.0 / 85.0;
 
 // Customizable settings
 const unsigned int DELAY_TIME = 1000; // [delay time] = ms
@@ -107,10 +110,19 @@ void setup() {
     outputFile.close();
   }
   
+  // communication setup
+  LoRa.setPins(PIN_LORA_CS, PIN_LORA_RESET, PIN_LORA_DIO0);
+  if (!LoRa.begin(433E6)){
+    Serial.println("Starting LoRa failed!");
+    while (1);
+  }
+  
   // init I2C for all peripherals
   ads.begin();
   bme.begin();
   lsm.begin();
+
+  ads.setGain(GAIN_TWOTHIRDS);
 
   // M10Q GPS is connected to UART 0
   gnss.begin(Serial);
@@ -118,15 +130,6 @@ void setup() {
   gnss.setUART1Output(COM_TYPE_UBX); //Set the UART port to output UBX only
   gnss.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
   gnss.saveConfiguration(); //Save the current settings to flash and BBR
-
-  //Comunication Setup
-  LoRa.setPins(PIN_CS_LORA, PIN_RESET_LORA, PIN_DIO0_LORA);
-
-  if (!LoRa.begin(433E6)){
-    Serial.println("Starting LoRa failed!");
-    while (1)
-      ;
-  }
 }
 
 
@@ -160,14 +163,14 @@ void loop() {
   outputFile = SD.open("/output.csv", FILE_APPEND);
   outputFile.println(dataContainerToString(sensorData, ";").c_str());
   outputFile.close();
-
-  printSensorData();
-  delay(DELAY_TIME);
-
+  
   // send data
   LoRa.beginPacket();
   LoRa.print(dataContainerToString(sensorData, ";").c_str());
   LoRa.endPacket();
+
+  printSensorData();
+  delay(DELAY_TIME);
 }
 
 
@@ -189,10 +192,7 @@ void getSensorData() {
   sensorData.latitude = gnss.getLatitude();
   sensorData.longitude = gnss.getLongitude();
   
-  // all data from ADS1115IDGSR not scaled
-  // TODO: make these readings useful
-  // TODO: change keys when updated to proper units
-  sensorData.batteryVoltage = ads.readADC_SingleEnded(ADC_BATTERY);
+  sensorData.batteryVoltage = ((ads.readADC_SingleEnded(ADC_BATTERY) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / BATTERY_DIVIDER_RATIO;
   sensorData.lightLevel = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
 
   if (currentMode) {
@@ -211,10 +211,7 @@ void getSensorData() {
     sensorData.magnetometer.y = lsm.calcMag(lsm.my);
     sensorData.magnetometer.z = lsm.calcMag(lsm.mz);
 
-    // all data from ADS1115IDGSR not scaled
-    // TODO: make these readings useful
-    // TODO: change keys when updated to proper units
-    sensorData.motorOutputVoltage = ads.readADC_SingleEnded(ADC_MOTOR);
+    sensorData.motorOutputVoltage = ((ads.readADC_SingleEnded(ADC_MOTOR) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / MOTOR_DIVIDER_RATIO;
 
     // TODO: make Hall effect sensor actually useful
     sensorData.hallEffect = analogRead(PIN_HALL_SENSOR);
