@@ -186,6 +186,9 @@ string dataContainerToString(dataContainer input, string seperator) {
 
 void getSensorData() {
   bme.read(sensorData.pressure, sensorData.temperature, sensorData.humidity);
+
+  lsm.readTemp();
+  sensorData.temperature = (lsm.temperature - 25) / 16.0 + 25;
   
   while (gpsConnection.available()) //available() returns the number of new bytes available from the GPS module
   {
