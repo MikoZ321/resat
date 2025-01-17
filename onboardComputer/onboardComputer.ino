@@ -59,7 +59,7 @@ const uint8_t PIN_SERVO = 16;
 const unsigned int LED_COUNT = 4;
 const float ADC_VOLTAGE_RANGE = 4.096; // [voltage range] = V
 const float ADC_DIGITAL_RANGE = 32767.0;
-const float BATTERY_DIVIDER_RATIO = 10.0 / 37.0;
+const float BATTERY_DIVIDER_RATIO = 10.0 / 56.0;
 const float MOTOR_DIVIDER_RATIO = 10.0 / 85.0;
 
 // Customizable settings
