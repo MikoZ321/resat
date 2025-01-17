@@ -26,9 +26,9 @@ struct dataContainer {
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
   float humidity; // [humidity] = % RH
-  float altitude; // [altitude] = m
-  float latitude; // [latitude] = degrees N
-  float longitude; // [longitude] = degrees E
+  double altitude; // [altitude] = m
+  double latitude; // [latitude] = degrees N
+  double longitude; // [longitude] = degrees E
   int lightLevel;
   float batteryVoltage; // [voltage] = V
   float motorOutputVoltage; // [voltage] = V
@@ -180,11 +180,16 @@ string dataContainerToString(dataContainer input, string seperator) {
 
 void getSensorData() {
   bme.read(sensorData.pressure, sensorData.temperature, sensorData.humidity);
+  
+  while (gpsConnection.available()) //available() returns the number of new bytes available from the GPS module
+  {
+    gps.encode(gpsConnection.read()); //Feed the GPS parser
+  }
 
-  gps.encode(gpsConnection.read());
-
-  sensorData.latitude = gps.location.lat();
-  sensorData.longitude = gps.location.lng();
+  if (gps.location.isValid()) {
+    sensorData.latitude = gps.location.lat();
+    sensorData.longitude = gps.location.lng();
+  }
 
   if (gps.altitude.isValid()) {
     sensorData.altitude = gps.altitude.meters();
@@ -196,27 +201,25 @@ void getSensorData() {
   sensorData.batteryVoltage = ((ads.readADC_SingleEnded(ADC_BATTERY) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / BATTERY_DIVIDER_RATIO;
   sensorData.lightLevel = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
 
-  if (currentMode) {
-    lsm.readGyro();
-    sensorData.gyro.x = lsm.calcGyro(lsm.gx);
-    sensorData.gyro.y = lsm.calcGyro(lsm.gy);
-    sensorData.gyro.z = lsm.calcGyro(lsm.gz);
+  lsm.readGyro();
+  sensorData.gyro.x = lsm.calcGyro(lsm.gx);
+  sensorData.gyro.y = lsm.calcGyro(lsm.gy);
+  sensorData.gyro.z = lsm.calcGyro(lsm.gz);
 
-    lsm.readAccel();
-    sensorData.acceleration.x = lsm.calcAccel(lsm.ax);
-    sensorData.acceleration.y = lsm.calcAccel(lsm.ay);
-    sensorData.acceleration.z = lsm.calcAccel(lsm.az);
+  lsm.readAccel();
+  sensorData.acceleration.x = lsm.calcAccel(lsm.ax);
+  sensorData.acceleration.y = lsm.calcAccel(lsm.ay);
+  sensorData.acceleration.z = lsm.calcAccel(lsm.az);
 
-    lsm.readMag();
-    sensorData.magnetometer.x = lsm.calcMag(lsm.mx);
-    sensorData.magnetometer.y = lsm.calcMag(lsm.my);
-    sensorData.magnetometer.z = lsm.calcMag(lsm.mz);
+  lsm.readMag();
+  sensorData.magnetometer.x = lsm.calcMag(lsm.mx);
+  sensorData.magnetometer.y = lsm.calcMag(lsm.my);
+  sensorData.magnetometer.z = lsm.calcMag(lsm.mz);
 
-    sensorData.motorOutputVoltage = ((ads.readADC_SingleEnded(ADC_MOTOR) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / MOTOR_DIVIDER_RATIO;
+  sensorData.motorOutputVoltage = ((ads.readADC_SingleEnded(ADC_MOTOR) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / MOTOR_DIVIDER_RATIO;
 
-    // TODO: make Hall effect sensor actually useful
-    sensorData.hallEffect = analogRead(PIN_HALL_SENSOR);
-  }
+  // TODO: make Hall effect sensor actually useful
+  sensorData.hallEffect = analogRead(PIN_HALL_SENSOR);
 }
 
 
