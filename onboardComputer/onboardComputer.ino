@@ -43,6 +43,7 @@ float getAngularSpeed();
 void getSensorData();  
 bool isDescending();
 void printSensorData();
+int16_t readTemperature();
 string vector3DToString(vector3D input, string seperator);
 
 // Pin definitions
@@ -194,6 +195,7 @@ string dataContainerToString(dataContainer input, string seperator) {
 
 float getAngularSpeed() {
   const int MIN_HALL_EFFECT = 2070;
+  float lastRevolutionTime = currentTime;
   int revolutions = 0;
   bool peak = false;
 
@@ -202,21 +204,25 @@ float getAngularSpeed() {
     if (sensorData > MIN_HALL_EFFECT && !peak) {
       peak = true;
       revolutions++;
+      lastRevolutionTime = millis();
     }
 
     if (sensorData < MIN_HALL_EFFECT) {
       peak = false;
     }
+    delay(1);
   }
-  return (60000.0/((millis() - currentTime) / 5.0)) * (revolutions == 5);
+  return (revolutions > 0) * (60000.0/((millis() - lastRevolutionTime) / revolutions));
 }
 
 
 void getSensorData() {
   bme.read(sensorData.pressure, sensorData.temperature, sensorData.humidity);
 
-  lsm.readTemp();
-  sensorData.temperature = (lsm.temperature - 25) / 16.0 + 25;
+  int16_t tempRaw = readTemperature();
+  
+  // Convert raw temperature to degrees Celsius
+  sensorData.temperature = tempRaw / 16.0 + 25.0;
   
   while (gpsConnection.available()) //available() returns the number of new bytes available from the GPS module
   {
@@ -265,6 +271,32 @@ bool isDescending() {
 // function only for testing will have no use in final code, temporary solution will be fixed soon
 void printSensorData() {
   Serial.println(dataContainerToString(sensorData, ";").c_str());
+}
+
+
+int16_t readTemperature() {
+  const int LSM9DS1_AG_ADDR  = 0x6B; // Accelerometer and gyroscope I2C address
+  const int LSM9DS1_TEMP_OUT_L = 0x15; // Temperature output register (low byte)
+  const int LSM9DS1_TEMP_OUT_H = 0x16; // Temperature output register (high byte)
+
+  int16_t temp;
+  
+  // Read low and high bytes of temperature data
+  Wire.beginTransmission(LSM9DS1_AG_ADDR);
+  Wire.write(LSM9DS1_TEMP_OUT_L);
+  Wire.endTransmission(false); // Restart
+  Wire.requestFrom(LSM9DS1_AG_ADDR, 2);
+
+  if (Wire.available() >= 2) {
+    uint8_t tempL = Wire.read();
+    uint8_t tempH = Wire.read();
+    temp = (int16_t)((tempH << 8) | tempL);
+  } else {
+    Serial.println("Failed to read temperature data");
+    temp = 0;
+  }
+
+  return temp;
 }
 
 
