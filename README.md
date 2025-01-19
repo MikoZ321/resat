@@ -7,7 +7,7 @@ This project will use two seperate microcontrollers: one onboard the CanSat and 
 ### Onboard Computer
 The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will be connected to the following peripherals:
 * BME280 - temperature, atmospheric pressure, and air humidity sensor
-* M10Q GPS QMC5883 - GPS module
+* PA1010D - GPS module
 * LSM9DS1TR - accelerometer, magnetometer, and gyroscope
 * HX6659IUA-B - Hall effect sensor, used to determine the number of rotations of the parachute relative to the CanSat body
 * ADS1115IDGSR - external analog to digital convertor, used to get more accurate digital conversions from both voltage dividers and the photoresistor

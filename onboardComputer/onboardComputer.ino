@@ -34,7 +34,6 @@ struct dataContainer {
   float motorOutputVoltage; // [voltage] = V
   vector3D gyro; // [gyro] = DPS
   vector3D acceleration; // [acceleration] = g
-  vector3D magnetometer; // [magnetometer] = Gauss
   float angularSpeed; // [angular speed] = RPM
 };
 
@@ -56,6 +55,7 @@ const uint8_t PIN_LED_STRIP = 26;
 const uint8_t PIN_LORA_CS = 5;
 const uint8_t PIN_LORA_DIO0 = 2;
 const uint8_t PIN_LORA_RESET = 17;
+const uint8_t PIN_POWER_SWITCH = 15;
 const uint8_t PIN_SD_CS = 14;
 const uint8_t PIN_SERVO = 16;
 
@@ -109,7 +109,7 @@ void setup() {
 
     // init header
     outputFile.print("tickCount;temperature;pressure;humidity;altitude;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
-    outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;magnetometerX;magnetometerY;magnetometerZ;hallEffect");
+    outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;angularSpeed");
 
     outputFile.close();
   }
@@ -131,6 +131,10 @@ void setup() {
 
   pinMode(PIN_HALL_SENSOR, INPUT);
   pinMode(PIN_BUZZER, OUTPUT);
+
+  // draw power from battery
+  pinMode(PIN_POWER_SWITCH, OUTPUT);
+  digitalWrite(PIN_POWER_SWITCH, LOW);
 }
 
 
@@ -141,7 +145,8 @@ void loop() {
 
   getSensorData();
 
-  sensorData.angularSpeed = getAngularSpeed();
+  // TODO: test when new hall sensor comes
+  // sensorData.angularSpeed = getAngularSpeed();
 
   if (!currentMode && isDescending()) {
     currentMode = 1;
@@ -188,8 +193,8 @@ string dataContainerToString(dataContainer input, string seperator) {
   return (to_string(sensorData.tickCount) + seperator + to_string(sensorData.temperature) + seperator + to_string(sensorData.pressure) + seperator + 
           to_string(sensorData.humidity) + seperator + to_string(sensorData.altitude) + seperator + to_string(sensorData.latitude) + seperator + 
           to_string(sensorData.longitude) + seperator + to_string(sensorData.lightLevel) + seperator + to_string(sensorData.batteryVoltage) + seperator + 
-          to_string(sensorData.motorOutputVoltage) + seperator + vector3DToString(sensorData.gyro, seperator) + seperator + vector3DToString(sensorData.acceleration, seperator) + seperator +
-          vector3DToString(sensorData.magnetometer, seperator) + seperator + to_string(sensorData.angularSpeed));
+          to_string(sensorData.motorOutputVoltage) + seperator + vector3DToString(sensorData.gyro, seperator) + seperator + vector3DToString(sensorData.acceleration, seperator) +
+          seperator + to_string(sensorData.angularSpeed));
 }
 
 
@@ -199,7 +204,7 @@ float getAngularSpeed() {
   int revolutions = 0;
   bool peak = false;
 
-  while (revolutions < 5 && (millis() - currentTime) % 1000 < 900) {
+  while (millis() - currentTime < 500) {
     float sensorData = analogRead(PIN_HALL_SENSOR);
     if (sensorData > MIN_HALL_EFFECT && !peak) {
       peak = true;
@@ -212,7 +217,16 @@ float getAngularSpeed() {
     }
     delay(1);
   }
-  return (revolutions > 0) * (60000.0/((millis() - lastRevolutionTime) / revolutions));
+
+  Serial.print(currentTime);
+  Serial.print(" ");
+  Serial.print(lastRevolutionTime);
+  Serial.print(" ");
+  Serial.print(revolutions);
+  Serial.print(" ");
+  Serial.println((lastRevolutionTime - currentTime) / revolutions);
+
+  return (revolutions > 0) * (60000.0/((lastRevolutionTime - currentTime) / revolutions));
 }
 
 
@@ -253,11 +267,6 @@ void getSensorData() {
   sensorData.acceleration.x = lsm.calcAccel(lsm.ax);
   sensorData.acceleration.y = lsm.calcAccel(lsm.ay);
   sensorData.acceleration.z = lsm.calcAccel(lsm.az);
-
-  lsm.readMag();
-  sensorData.magnetometer.x = lsm.calcMag(lsm.mx);
-  sensorData.magnetometer.y = lsm.calcMag(lsm.my);
-  sensorData.magnetometer.z = lsm.calcMag(lsm.mz);
 
   sensorData.motorOutputVoltage = ((ads.readADC_SingleEnded(ADC_MOTOR) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / MOTOR_DIVIDER_RATIO;
 }
