@@ -38,6 +38,7 @@ struct dataContainer {
 };
 
 string dataContainerToString(dataContainer input, string seperator);
+float digitalToAnalog(int digitalInput, int r1, int r2);
 float getAngularSpeed();
 void getSensorData();  
 bool isDescending();
@@ -62,13 +63,18 @@ const uint8_t PIN_SERVO = 16;
 const unsigned int LED_COUNT = 4;
 const float ADC_VOLTAGE_RANGE = 4.096; // [voltage range] = V
 const float ADC_DIGITAL_RANGE = 32767.0;
-const float BATTERY_DIVIDER_RATIO = 10.0 / 56.0;
-const float MOTOR_DIVIDER_RATIO = 10.0 / 85.0;
+const float BATTERY_R1 = 46.0; // [resistance] = kiloOhms
+const float BATTERY_R2 = 10.0; // [resistance] = kiloOhms
+const float MOTOR_R1 = 75.0; // [resistance] = kiloOhms
+const float MOTOR_R2 = 10.0; // [resistance] = kiloOhms
 
 // Customizable settings
+const string CSV_SEPERATOR = ";";
 const unsigned int DELAY_TIME = 1000; // [delay time] = ms
 const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
+const int MIN_HALL_EFFECT = 2070;
 const int MIN_LIGHT_LEVEL = 500;
+const char *OUTPUT_FILE_NAME = "/onboardData.csv";
 const int SERVO_ROTATION_ANGLE = 90; // [angle] = degree
 
 // Init objects to control peripherals
@@ -104,8 +110,8 @@ void setup() {
   myServo.attach(PIN_SERVO);
   
   SD.begin(PIN_SD_CS);
-  if (!SD.exists("/output.csv")) {
-    outputFile = SD.open("/output.csv", FILE_WRITE);
+  if (!SD.exists(OUTPUT_FILE_NAME)) {
+    outputFile = SD.open(OUTPUT_FILE_NAME, FILE_WRITE);
 
     // init header
     outputFile.print("tickCount;temperature;pressure;humidity;altitude;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
@@ -171,13 +177,13 @@ void loop() {
   }
 
   // write data to SD 
-  outputFile = SD.open("/output.csv", FILE_APPEND);
-  outputFile.println(dataContainerToString(sensorData, ";").c_str());
+  outputFile = SD.open(OUTPUT_FILE_NAME, FILE_APPEND);
+  outputFile.println(dataContainerToString(sensorData, CSV_SEPERATOR).c_str());
   outputFile.close();
   
   // send data
   LoRa.beginPacket();
-  LoRa.print(dataContainerToString(sensorData, ";").c_str());
+  LoRa.print(dataContainerToString(sensorData, CSV_SEPERATOR).c_str());
   LoRa.endPacket();
 
   printSensorData();
@@ -198,8 +204,13 @@ string dataContainerToString(dataContainer input, string seperator) {
 }
 
 
+float digitalToAnalog(int digitalInput, float r1, float r2) {
+  float dividerRatio = r2 / (r1 + r2);
+  return ((digitalInput * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / dividerRatio;
+}
+
+
 float getAngularSpeed() {
-  const int MIN_HALL_EFFECT = 2070;
   float lastRevolutionTime = currentTime;
   int revolutions = 0;
   bool peak = false;
@@ -254,8 +265,10 @@ void getSensorData() {
   else {
     sensorData.altitude = EnvironmentCalculations::Altitude(sensorData.pressure);
   }
-  
-  sensorData.batteryVoltage = ((ads.readADC_SingleEnded(ADC_BATTERY) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / BATTERY_DIVIDER_RATIO;
+
+  int digitalValue = ads.readADC_SingleEnded(ADC_BATTERY);
+  sensorData.batteryVoltage = digitalToAnalog(digitalValue, BATTERY_R1, BATTERY_R2);
+
   sensorData.lightLevel = ads.readADC_SingleEnded(ADC_PHOTORESISTOR);
 
   lsm.readGyro();
@@ -268,7 +281,8 @@ void getSensorData() {
   sensorData.acceleration.y = lsm.calcAccel(lsm.ay);
   sensorData.acceleration.z = lsm.calcAccel(lsm.az);
 
-  sensorData.motorOutputVoltage = ((ads.readADC_SingleEnded(ADC_MOTOR) * ADC_VOLTAGE_RANGE) / ADC_DIGITAL_RANGE) / MOTOR_DIVIDER_RATIO;
+  digitalValue = ads.readADC_SingleEnded(ADC_MOTOR);
+  sensorData.motorOutputVoltage = digitalToAnalog(digitalValue, MOTOR_R1, MOTOR_R2);
 }
 
 
