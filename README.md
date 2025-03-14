@@ -19,6 +19,9 @@ The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will 
 * Buzzer 2700Hz - buzzer, used to help locate the CanSat after landing
 * WS2812B (with 4 pixels) - LED strip, used to indicate the current mode of the CanSat
 
+### Ground Station
+The ground station will consist of a smaller custom-made PCB, which will receive the data transmitted from the onboard computer via LoRa, save it onto a SD card, host a web server to display it in real time, and indicate where the antenna should be pointed for best signal reception.
+
 ## Setup Process
 This project was coded in Arduino IDE using the esp32 board library by Espressif (for a step-by-step setup process consult the link https://dronebotworkshop.com/esp32-intro/)
 
@@ -31,6 +34,8 @@ Libraries used:
 * [Adafruit ADS1X15](https://github.com/adafruit/Adafruit_ADS1X15)
 * [ESP32Servo](https://madhephaestus.github.io/ESP32Servo/classServo.html)
 * [Lora by Sandeep Mistry](https://github.com/sandeepmistry/arduino-LoRa)
+* [Async TCP](https://github.com/ESP32Async/AsyncTCP)
+* [ESP Async WebServer](https://github.com/ESP32Async/ESPAsyncWebServer)
 
 ## Software Architecture and Design
 This project will consist of two main parts: 
