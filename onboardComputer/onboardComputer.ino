@@ -71,6 +71,9 @@ const float MOTOR_R2 = 10.0; // [resistance] = kiloOhms
 // Customizable settings
 const string CSV_SEPERATOR = ";";
 const unsigned int DELAY_TIME = 1000; // [delay time] = ms
+const double LORA_FREQUENCY = 433E6; // also change in groundStation.ino
+const double LORA_SIGNAL_BANDWITH = 125E3; // also change in groundStation.ino
+const int LORA_SPREADING_FACTOR = 10; // also change in groundStation.ino
 const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
 const int MIN_HALL_EFFECT = 2070;
 const int MIN_LIGHT_LEVEL = 500;
@@ -122,10 +125,13 @@ void setup() {
   
   // communication setup
   LoRa.setPins(PIN_LORA_CS, PIN_LORA_RESET, PIN_LORA_DIO0);
-  if (!LoRa.begin(433E6)){
+  if (!LoRa.begin(LORA_FREQUENCY)){
     Serial.println("Starting LoRa failed!");
     while (1);
   }
+
+  LoRa.setSignalBandwidth(LORA_SIGNAL_BANDWITH);
+  LoRa.setSpreadingFactor(LORA_SPREADING_FACTOR);
   
   // init I2C for all peripherals
   ads.begin();
