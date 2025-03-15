@@ -8,6 +8,7 @@
 #include <LSM9DS1TR-SOLDERED.h>
 #include <SD.h>
 #include <SparkFun_I2C_GPS_Arduino_Library.h>
+#include <SparkFun_TMP117.h>
 #include <SPI.h>
 #include <string>
 #include <TinyGPS++.h>
@@ -26,7 +27,8 @@ struct dataContainer {
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
   float humidity; // [humidity] = % RH
-  double altitude; // [altitude] = m
+  double altitudeGPS; // [altitude] = m
+  double altitudePressure; // [altitude] = m
   double latitude; // [latitude] = degrees N
   double longitude; // [longitude] = degrees E
   int lightLevel;
@@ -87,6 +89,7 @@ BME280I2C bme; // I2C
 LSM9DS1TR lsm; // I2C
 I2CGPS gpsConnection; // I2C
 TinyGPSPlus gps;
+TMP117 tmp117;
 Servo myServo; // PWM
 
 dataContainer sensorData;
@@ -117,7 +120,7 @@ void setup() {
     outputFile = SD.open(OUTPUT_FILE_NAME, FILE_WRITE);
 
     // init header
-    outputFile.print("tickCount;temperature;pressure;humidity;altitude;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
+    outputFile.print("tickCount;temperature;pressure;humidity;altitudeGPS;altitudePressure;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
     outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;angularSpeed");
 
     outputFile.close();
@@ -138,6 +141,7 @@ void setup() {
   bme.begin();
   gpsConnection.begin();
   lsm.begin();
+  tmp117.begin(0x49);
 
   ads.setGain(GAIN_TWOTHIRDS);
 
@@ -153,7 +157,7 @@ void setup() {
 void loop() {
   currentTime = millis();
   sensorData.tickCount++;
-  previousAltitude = sensorData.altitude;
+  previousAltitude = sensorData.altitudePressure;
 
   getSensorData();
 
@@ -203,7 +207,7 @@ void loop() {
 // this is a mess will try to fix
 string dataContainerToString(dataContainer input, string seperator) {
   return (to_string(sensorData.tickCount) + seperator + to_string(sensorData.temperature) + seperator + to_string(sensorData.pressure) + seperator + 
-          to_string(sensorData.humidity) + seperator + to_string(sensorData.altitude) + seperator + to_string(sensorData.latitude) + seperator + 
+          to_string(sensorData.humidity) + seperator + to_string(sensorData.altitudeGPS) + seperator + to_string(sensorData.altitudePressure) + seperator + to_string(sensorData.latitude) + seperator + 
           to_string(sensorData.longitude) + seperator + to_string(sensorData.lightLevel) + seperator + to_string(sensorData.batteryVoltage) + seperator + 
           to_string(sensorData.motorOutputVoltage) + seperator + vector3DToString(sensorData.gyro, seperator) + seperator + vector3DToString(sensorData.acceleration, seperator) +
           seperator + to_string(sensorData.angularSpeed));
@@ -250,10 +254,7 @@ float getAngularSpeed() {
 void getSensorData() {
   bme.read(sensorData.pressure, sensorData.temperature, sensorData.humidity);
 
-  int16_t tempRaw = readTemperature();
-  
-  // Convert raw temperature to degrees Celsius
-  sensorData.temperature = tempRaw / 16.0 + 25.0;
+  sensorData.temperature = tmp117.readTempC();
   
   while (gpsConnection.available()) //available() returns the number of new bytes available from the GPS module
   {
@@ -265,12 +266,8 @@ void getSensorData() {
     sensorData.longitude = gps.location.lng();
   }
 
-  if (gps.altitude.isValid()) {
-    sensorData.altitude = gps.altitude.meters();
-  }
-  else {
-    sensorData.altitude = EnvironmentCalculations::Altitude(sensorData.pressure);
-  }
+  sensorData.altitudeGPS = gps.altitude.meters();
+  sensorData.altitudePressure = EnvironmentCalculations::Altitude(sensorData.pressure);
 
   int digitalValue = ads.readADC_SingleEnded(ADC_BATTERY);
   sensorData.batteryVoltage = digitalToAnalog(digitalValue, BATTERY_R1, BATTERY_R2);
@@ -293,39 +290,13 @@ void getSensorData() {
 
 
 bool isDescending() {
-  return (previousAltitude - sensorData.altitude > MIN_ALTITUDE_DIFFERENCE) && (sensorData.lightLevel > MIN_LIGHT_LEVEL);
+  return (previousAltitude - sensorData.altitudeGPS > MIN_ALTITUDE_DIFFERENCE) && (sensorData.lightLevel > MIN_LIGHT_LEVEL);
 }
 
 
 // function only for testing will have no use in final code, temporary solution will be fixed soon
 void printSensorData() {
   Serial.println(dataContainerToString(sensorData, ";").c_str());
-}
-
-
-int16_t readTemperature() {
-  const int LSM9DS1_AG_ADDR  = 0x6B; // Accelerometer and gyroscope I2C address
-  const int LSM9DS1_TEMP_OUT_L = 0x15; // Temperature output register (low byte)
-  const int LSM9DS1_TEMP_OUT_H = 0x16; // Temperature output register (high byte)
-
-  int16_t temp;
-  
-  // Read low and high bytes of temperature data
-  Wire.beginTransmission(LSM9DS1_AG_ADDR);
-  Wire.write(LSM9DS1_TEMP_OUT_L);
-  Wire.endTransmission(false); // Restart
-  Wire.requestFrom(LSM9DS1_AG_ADDR, 2);
-
-  if (Wire.available() >= 2) {
-    uint8_t tempL = Wire.read();
-    uint8_t tempH = Wire.read();
-    temp = (int16_t)((tempH << 8) | tempL);
-  } else {
-    Serial.println("Failed to read temperature data");
-    temp = 0;
-  }
-
-  return temp;
 }
 
 

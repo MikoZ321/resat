@@ -27,6 +27,7 @@ This project was coded in Arduino IDE using the esp32 board library by Espressif
 
 Libraries used:
 * [BME280 by Tyler Glenn](https://github.com/finitespace/BME280/tree/master) 
+* [SparkFun TMP117](https://github.com/sparkfun/SparkFun_TMP117_Arduino_Library)
 * [Sparkfun I2C GPS](https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library) 
 * [Tiny GPS Plus](https://github.com/mikalhart/TinyGPSPlus)
 * [Soldered-LSM9DS1TR-Arduino-Library](https://github.com/SolderedElectronics/Soldered-LSM9DS1TR-Arduino-Library/tree/main)
