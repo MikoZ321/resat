@@ -6,7 +6,8 @@ This project will use two seperate microcontrollers: one onboard the CanSat and 
 
 ### Onboard Computer
 The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will be connected to the following peripherals:
-* BME280 - temperature, atmospheric pressure, and air humidity sensor
+* BME280 - atmospheric pressure and air humidity sensor
+* TMP117 - temperature sensor
 * PA1010D - GPS module
 * LSM9DS1TR - accelerometer, magnetometer, and gyroscope
 * HX6659IUA-B - Hall effect sensor, used to determine the number of rotations of the parachute relative to the CanSat body
@@ -26,7 +27,7 @@ The ground station will consist of a smaller custom-made PCB, which will receive
 This project was coded in Arduino IDE using the esp32 board library by Espressif (for a step-by-step setup process consult the link https://dronebotworkshop.com/esp32-intro/)
 
 Libraries used:
-* [BME280 by Tyler Glenn](https://github.com/finitespace/BME280/tree/master) 
+* [Adafruit BME280](https://github.com/adafruit/Adafruit_BME280_Library)
 * [SparkFun TMP117](https://github.com/sparkfun/SparkFun_TMP117_Arduino_Library)
 * [Sparkfun I2C GPS](https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library) 
 * [Tiny GPS Plus](https://github.com/mikalhart/TinyGPSPlus)

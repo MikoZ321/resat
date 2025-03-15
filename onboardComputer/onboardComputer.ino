@@ -1,8 +1,7 @@
 #include <Adafruit_ADS1X15.h>
+#include <Adafruit_BME280.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
-#include <BME280I2C.h>
-#include <EnvironmentCalculations.h>
 #include <ESP32Servo.h>
 #include <LoRa.h>
 #include <LSM9DS1TR-SOLDERED.h>
@@ -27,10 +26,10 @@ struct dataContainer {
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
   float humidity; // [humidity] = % RH
-  double altitudeGPS; // [altitude] = m
-  double altitudePressure; // [altitude] = m
-  double latitude; // [latitude] = degrees N
-  double longitude; // [longitude] = degrees E
+  float altitudeGPS; // [altitude] = m
+  float altitudePressure; // [altitude] = m
+  float latitude; // [latitude] = degrees N
+  float longitude; // [longitude] = degrees E
   int lightLevel;
   float batteryVoltage; // [voltage] = V
   float motorOutputVoltage; // [voltage] = V
@@ -85,7 +84,7 @@ const int SERVO_ROTATION_ANGLE = 90; // [angle] = degree
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
 Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
-BME280I2C bme; // I2C
+Adafruit_BME280 bme; // I2C
 LSM9DS1TR lsm; // I2C
 I2CGPS gpsConnection; // I2C
 TinyGPSPlus gps;
@@ -138,7 +137,7 @@ void setup() {
   
   // init I2C for all peripherals
   ads.begin();
-  bme.begin();
+  bme.begin(0x76);
   gpsConnection.begin();
   lsm.begin();
   tmp117.begin(0x49);
@@ -252,10 +251,13 @@ float getAngularSpeed() {
 
 
 void getSensorData() {
-  bme.read(sensorData.pressure, sensorData.temperature, sensorData.humidity);
+  if (tmp117.dataReady()){
+    sensorData.temperature = tmp117.readTempC();
+  }
 
-  sensorData.temperature = tmp117.readTempC();
-  
+  sensorData.pressure = bme.readPressure() / 100.0F; // Convert to hPa
+  sensorData.altitudePressure = bme.readAltitude(1013.25); // Absolute altitude
+
   while (gpsConnection.available()) //available() returns the number of new bytes available from the GPS module
   {
     gps.encode(gpsConnection.read()); //Feed the GPS parser
@@ -264,10 +266,8 @@ void getSensorData() {
   if (gps.location.isValid()) {
     sensorData.latitude = gps.location.lat();
     sensorData.longitude = gps.location.lng();
+    sensorData.altitudeGPS = gps.altitude.meters();
   }
-
-  sensorData.altitudeGPS = gps.altitude.meters();
-  sensorData.altitudePressure = EnvironmentCalculations::Altitude(sensorData.pressure);
 
   int digitalValue = ads.readADC_SingleEnded(ADC_BATTERY);
   sensorData.batteryVoltage = digitalToAnalog(digitalValue, BATTERY_R1, BATTERY_R2);
