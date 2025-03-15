@@ -83,11 +83,14 @@ void setup() {
     request->send(LittleFS, "/script.js", "application/javascript");
   });
 
+  server.on("/cyberfreight.otf", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/cyberfreight.otf", "font/otf");
+  });
+
   server.begin();
 }
  
 void loop() {
-  delay(1000);
   // Try to parse packet
   int packetSize = LoRa.parsePacket();
   if (packetSize) {
