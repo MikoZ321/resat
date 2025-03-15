@@ -1,5 +1,6 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <LittleFS.h>
 #include <LoRa.h>
 #include <SPI.h>
 #include <WiFi.h>
@@ -16,8 +17,8 @@ const double LORA_SIGNAL_BANDWITH = 125E3; // also change in onboardComputer.ino
 const int LORA_SPREADING_FACTOR = 10; // also change in onboardComputer.ino
 
 // Wi-Fi credentials
-const char *ssid = "SSID";
-const char *password = "PASSWORD";
+const char *ssid = "Sosnowe Wzgorze";
+const char *password = "9349055587";
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws"); // WebSocket endpoint
@@ -49,9 +50,14 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("\nConnected to Wi-Fi, IP: " + WiFi.localIP().toString());
+
+  if (!LittleFS.begin(true)) {
+    Serial.println("An error occurred while mounting LittleFS.");
+    return;
+  }
  
   // Setup LoRa module
-  LoRa.setPins(PIN_LORA_CS, PIN_LORA_RESET, PIN_LORA_DIO0);
+  /**LoRa.setPins(PIN_LORA_CS, PIN_LORA_RESET, PIN_LORA_DIO0);
  
   if (!LoRa.begin(LORA_FREQUENCY)) {
     Serial.println("Starting LoRa failed!");
@@ -60,39 +66,24 @@ void setup() {
   }
 
   LoRa.setSignalBandwidth(LORA_SIGNAL_BANDWITH);
-  LoRa.setSpreadingFactor(LORA_SPREADING_FACTOR);
+  LoRa.setSpreadingFactor(LORA_SPREADING_FACTOR);**/
 
   // WebSocket setup
   ws.onEvent(onWebSocketEvent);
   server.addHandler(&ws);
 
-  // Serve Web Page
+  // Serve HTML, CSS, and JS from SPIFFS
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/html", getHTML());
+    request->send(LittleFS, "/index.html", "text/html");
+  });
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/style.css", "text/css");
+  });
+  server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/script.js", "application/javascript");
   });
 
   server.begin();
-}
-
-String getHTML() {
-    return R"rawliteral(
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>ESP32 LoRa Live Data</title>
-            <script>
-                var ws = new WebSocket("ws://" + window.location.host + "/ws");
-                ws.onmessage = function(event) {
-                    document.getElementById("loradata").innerText = event.data;
-                };
-            </script>
-        </head>
-        <body>
-            <h2>Live LoRa Data:</h2>
-            <h3 id="loradata">Waiting for data...</h3>
-        </body>
-        </html>
-    )rawliteral";
 }
  
 void loop() {
