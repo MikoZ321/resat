@@ -115,9 +115,13 @@ void loop() {
     while (LoRa.available()) {
       rawData += (char)LoRa.read();
     }
+    Serial.println(LoRa.packetRssi());
+    //Serial.println(rawData);
  
     parseLoRaData(rawData);
     String jsonData = dataToJSON();
+
+    //Serial.println(jsonData);
     sendWebSocketMessage(jsonData);  
   }
   ws.cleanupClients();

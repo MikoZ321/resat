@@ -18,4 +18,5 @@ ws.onmessage = function(event) {
     document.getElementById("accelY").innerText = data.accelY;
     document.getElementById("accelZ").innerText = data.accelZ;
     document.getElementById("angularSpeed").innerText = data.angularSpeed;
+    document.getElementById("rssi").innerText = data.altitudeGPS;
 };
