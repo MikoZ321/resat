@@ -117,14 +117,14 @@ void loop() {
     }
  
     parseLoRaData(rawData);
-    String jsonData = dataToJSON();
+    String jsonData = dataToJSON(LoRa.packetRssi());
     sendWebSocketMessage(jsonData);  
   }
   ws.cleanupClients();
 }
 
 
-String dataToJSON(void) {
+String dataToJSON(int RSSI) {
   String jsonData = "{";
   jsonData += "\"tickCount\":" + receivedData[0] + ",";
   jsonData += "\"temperature\":" + receivedData[1] + ",";
@@ -137,9 +137,14 @@ String dataToJSON(void) {
   jsonData += "\"lightLevel\":" + receivedData[8] + ",";
   jsonData += "\"batteryVoltage\":" + receivedData[9] + ",";
   jsonData += "\"motorOutputVoltage\":" + receivedData[10] + ",";
-  jsonData += "\"gyro\":{\"x\":" + receivedData[11] + ",\"y\":" + receivedData[12] + ",\"z\":" + receivedData[13] + "},";
-  jsonData += "\"acceleration\":{\"x\":" + receivedData[14] + ",\"y\":" + receivedData[15] + ",\"z\":" + receivedData[16] + "},";
-  jsonData += "\"angularSpeed\":" + receivedData[17];
+  jsonData += "\"gyroX\":" + receivedData[11] + ",";
+  jsonData += "\"gyroY\":" + receivedData[12] + ",";
+  jsonData += "\"gyroZ\":" + receivedData[13] + ",";
+  jsonData += "\"accelX\":" + receivedData[14] + ",";
+  jsonData += "\"accelY\":" + receivedData[15] + ",";
+  jsonData += "\"accelZ\":" + receivedData[16] + ",";
+  jsonData += "\"angularSpeed\":" + receivedData[17] + ",";
+  jsonData += "\"RSSI\":" +  RSSI;
   jsonData += "}";
   return jsonData;
 }
