@@ -38,7 +38,6 @@ Libraries used:
 * [Lora by Sandeep Mistry](https://github.com/sandeepmistry/arduino-LoRa)
 * [Async TCP](https://github.com/ESP32Async/AsyncTCP)
 * [ESP Async WebServer](https://github.com/ESP32Async/ESPAsyncWebServer)
-* [Arduino JSON](https://arduinojson.org/?utm_source=meta&utm_medium=library.properties)
 
 Follow [this guide](https://randomnerdtutorials.com/arduino-ide-2-install-esp32-littlefs/) for Little FS upload to ESP32
 

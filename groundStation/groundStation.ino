@@ -1,5 +1,3 @@
-#include <ArduinoJson.h>
-#include <ArduinoJson.hpp>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
@@ -7,7 +5,23 @@
 #include <SPI.h>
 #include <WiFi.h>
 
-struct vector3D {
+// Pin definitions
+#define PIN_LORA_CS 3     // LoRa radio chip select
+#define PIN_LORA_RESET 5 // LoRa radio reset
+#define PIN_LORA_DIO0 4   // Must be a hardware interrupt pin
+
+// Customizable settings
+// Should be moved to a different document for consistency with onboardComputer
+#define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
+#define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
+#define LORA_SPREADING_FACTOR 10 // also change in onboardComputer.ino
+#define LORA_ITEM_COUNT 18
+
+// Wi-Fi credentials
+#define SSID "Sosnowe Wzgorze"
+#define PASSWORD "9349055587"
+
+/*struct vector3D {
   float x;
   float y;
   float z;
@@ -28,27 +42,13 @@ struct dataContainer {
   vector3D gyro; // [gyro] = DPS
   vector3D acceleration; // [acceleration] = g
   float angularSpeed; // [angular speed] = RPM
-};
-
-// Pin definitions
-const int PIN_LORA_CS = 3;     // LoRa radio chip select
-const int PIN_LORA_RESET = 5;  // LoRa radio reset
-const int PIN_LORA_DIO0 = 4;    // Must be a hardware interrupt pin
-
-// Customizable settings
-// Should be moved to a different document for consistency with onboardComputer
-const double LORA_FREQUENCY = 433E6; // also change in onboardComputer.ino
-const double LORA_SIGNAL_BANDWITH = 125E3; // also change in onboardComputer.ino
-const int LORA_SPREADING_FACTOR = 10; // also change in onboardComputer.ino
-
-// Wi-Fi credentials
-const char *ssid = "Sosnowe Wzgorze";
-const char *password = "9349055587";
+};*/
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws"); // WebSocket endpoint
 
-dataContainer receivedData;
+// parsed data is stored in this str arr in the order of the dataContainer struct
+String receivedData[LORA_ITEM_COUNT];
 
 String dataToJSON(void);
 void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
@@ -60,7 +60,7 @@ void setup() {
   while (!Serial)
     ;
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(SSID, PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -118,7 +118,7 @@ void loop() {
  
     parseLoRaData(rawData);
     String jsonData = dataToJSON();
-    sendWebSocketMessage(jsonData);
+    sendWebSocketMessage(jsonData);  
   }
   ws.cleanupClients();
 }
@@ -126,20 +126,20 @@ void loop() {
 
 String dataToJSON(void) {
   String jsonData = "{";
-  jsonData += "\"tickCount\":" + String(receivedData.tickCount) + ",";
-  jsonData += "\"temperature\":" + String(receivedData.temperature) + ",";
-  jsonData += "\"pressure\":" + String(receivedData.pressure) + ",";
-  jsonData += "\"humidity\":" + String(receivedData.humidity) + ",";
-  jsonData += "\"altitudeGPS\":" + String(receivedData.altitudeGPS) + ",";
-  jsonData += "\"altitudePressure\":" + String(receivedData.altitudePressure) + ",";
-  jsonData += "\"latitude\":" + String(receivedData.latitude) + ",";
-  jsonData += "\"longitude\":" + String(receivedData.longitude) + ",";
-  jsonData += "\"lightLevel\":" + String(receivedData.lightLevel) + ",";
-  jsonData += "\"batteryVoltage\":" + String(receivedData.batteryVoltage) + ",";
-  jsonData += "\"motorOutputVoltage\":" + String(receivedData.motorOutputVoltage) + ",";
-  jsonData += "\"gyro\":{\"x\":" + String(receivedData.gyro.x) + ",\"y\":" + String(receivedData.gyro.y) + ",\"z\":" + String(receivedData.gyro.z) + "},";
-  jsonData += "\"acceleration\":{\"x\":" + String(receivedData.acceleration.x) + ",\"y\":" + String(receivedData.acceleration.y) + ",\"z\":" + String(receivedData.acceleration.z) + "},";
-  jsonData += "\"angularSpeed\":" + String(receivedData.angularSpeed);
+  jsonData += "\"tickCount\":" + receivedData[0] + ",";
+  jsonData += "\"temperature\":" + receivedData[1] + ",";
+  jsonData += "\"pressure\":" + receivedData[2] + ",";
+  jsonData += "\"humidity\":" + receivedData[3] + ",";
+  jsonData += "\"altitudeGPS\":" + receivedData[4] + ",";
+  jsonData += "\"altitudePressure\":" + receivedData[5] + ",";
+  jsonData += "\"latitude\":" + receivedData[6] + ",";
+  jsonData += "\"longitude\":" + receivedData[7] + ",";
+  jsonData += "\"lightLevel\":" + receivedData[8] + ",";
+  jsonData += "\"batteryVoltage\":" + receivedData[9] + ",";
+  jsonData += "\"motorOutputVoltage\":" + receivedData[10] + ",";
+  jsonData += "\"gyro\":{\"x\":" + receivedData[11] + ",\"y\":" + receivedData[12] + ",\"z\":" + receivedData[13] + "},";
+  jsonData += "\"acceleration\":{\"x\":" + receivedData[14] + ",\"y\":" + receivedData[15] + ",\"z\":" + receivedData[16] + "},";
+  jsonData += "\"angularSpeed\":" + receivedData[17];
   jsonData += "}";
   return jsonData;
 }
@@ -177,62 +177,27 @@ void sendWebSocketMessage(String message) {
 
 
 void parseLoRaData(String rawData) {
-  char buf[rawData.length() + 1];
-  rawData.toCharArray(buf, sizeof(buf));
+  char stringArray[rawData.length() + 1];
+  rawData.toCharArray(stringArray, sizeof(stringArray));
 
-  char *token = strtok(buf, ";");
-  if (token == NULL) return;
+  int currentIndex = 0;
+  char buffer[32];  // Use a char array for better memory management
+  int bufIndex = 0;
 
-  receivedData.tickCount = atol(token);
+  for (int i = 0; i <= rawData.length(); i++) {  // Use regular loop
+    char character = stringArray[i];
 
-  token = strtok(NULL, ";");
-  receivedData.temperature = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.pressure = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.humidity = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.altitudeGPS = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.altitudePressure = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.latitude = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.longitude = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.lightLevel = atoi(token);
-
-  token = strtok(NULL, ";");
-  receivedData.batteryVoltage = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.motorOutputVoltage = atof(token);
-
-  token = strtok(NULL, ";");
-  receivedData.gyro.x = atof(token);
-  
-  token = strtok(NULL, ";");
-  receivedData.gyro.y = atof(token);
-  
-  token = strtok(NULL, ";");
-  receivedData.gyro.z = atof(token);
-  
-  token = strtok(NULL, ";");
-  receivedData.acceleration.x = atof(token);
-  
-  token = strtok(NULL, ";");
-  receivedData.acceleration.y = atof(token);
-  
-  token = strtok(NULL, ";");
-  receivedData.acceleration.z = atof(token);
-  
-  token = strtok(NULL, ";");
-  receivedData.angularSpeed = atof(token);
+    if (character == ';' || character == '\0') {
+      buffer[bufIndex] = '\0';  // Null-terminate the buffer
+      if (currentIndex < LORA_ITEM_COUNT) {  // Prevent buffer overflow
+        receivedData[currentIndex] = String(buffer);
+        currentIndex++;
+      }
+      bufIndex = 0;  // Reset buffer index
+    } else {
+      if (bufIndex < sizeof(buffer) - 1) {  // Prevent buffer overflow
+        buffer[bufIndex++] = character;
+      }
+    }
+  }
 }

@@ -43,8 +43,6 @@ float digitalToAnalog(int digitalInput, int r1, int r2);
 float getAngularSpeed();
 void getSensorData();  
 bool isDescending();
-void printSensorData();
-int16_t readTemperature();
 string vector3DToString(vector3D input, string seperator);
 
 // Pin definitions
@@ -291,12 +289,6 @@ void getSensorData() {
 
 bool isDescending() {
   return (previousAltitude - sensorData.altitudeGPS > MIN_ALTITUDE_DIFFERENCE) && (sensorData.lightLevel > MIN_LIGHT_LEVEL);
-}
-
-
-// function only for testing will have no use in final code, temporary solution will be fixed soon
-void printSensorData() {
-  Serial.println(dataContainerToString(sensorData, ";").c_str());
 }
 
 
