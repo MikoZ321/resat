@@ -192,8 +192,6 @@ void loop() {
   LoRa.beginPacket();
   LoRa.print(dataContainerToString(sensorData, CSV_SEPERATOR).c_str());
   LoRa.endPacket();
-
-  printSensorData();
   
   while(millis() % DELAY_TIME) {
     ;
