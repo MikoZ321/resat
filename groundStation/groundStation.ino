@@ -6,9 +6,9 @@
 #include <WiFi.h>
 
 // Pin definitions
-#define PIN_LORA_CS 3     // LoRa radio chip select
-#define PIN_LORA_RESET 5 // LoRa radio reset
-#define PIN_LORA_DIO0 4   // Must be a hardware interrupt pin
+#define PIN_LORA_CS 5     // LoRa radio chip select
+#define PIN_LORA_RESET 17 // LoRa radio reset
+#define PIN_LORA_DIO0 2   // Must be a hardware interrupt pin
 
 // Customizable settings
 // Should be moved to a different document for consistency with onboardComputer
@@ -18,8 +18,8 @@
 #define LORA_ITEM_COUNT 18
 
 // Wi-Fi credentials
-#define SSID "Sosnowe Wzgorze"
-#define PASSWORD "9349055587"
+#define SSID "Kontyner"
+#define PASSWORD "Kancelaria2012"
 
 /*struct vector3D {
   float x;
@@ -117,14 +117,14 @@ void loop() {
     }
  
     parseLoRaData(rawData);
-    String jsonData = dataToJSON(LoRa.packetRssi());
+    String jsonData = dataToJSON();
     sendWebSocketMessage(jsonData);  
   }
   ws.cleanupClients();
 }
 
 
-String dataToJSON(int RSSI) {
+String dataToJSON(void) {
   String jsonData = "{";
   jsonData += "\"tickCount\":" + receivedData[0] + ",";
   jsonData += "\"temperature\":" + receivedData[1] + ",";
@@ -143,8 +143,7 @@ String dataToJSON(int RSSI) {
   jsonData += "\"accelX\":" + receivedData[14] + ",";
   jsonData += "\"accelY\":" + receivedData[15] + ",";
   jsonData += "\"accelZ\":" + receivedData[16] + ",";
-  jsonData += "\"angularSpeed\":" + receivedData[17] + ",";
-  jsonData += "\"RSSI\":" +  RSSI;
+  jsonData += "\"angularSpeed\":" + receivedData[17];
   jsonData += "}";
   return jsonData;
 }
