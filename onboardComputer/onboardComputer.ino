@@ -4,7 +4,6 @@
 #include <Adafruit_Sensor.h>
 #include <array>
 #include <charconv>
-#include <ESP32Servo.h>
 #include <LoRa.h>
 #include <LSM9DS1TR-SOLDERED.h>
 #include <SD.h>
@@ -60,7 +59,6 @@ const uint8_t PIN_LORA_DIO0 = 2;
 const uint8_t PIN_LORA_RESET = 17;
 const uint8_t PIN_POWER_SWITCH = 15;
 const uint8_t PIN_SD_CS = 14;
-const uint8_t PIN_SERVO = 16;
 
 const unsigned int LED_COUNT = 4;
 const float ADC_VOLTAGE_RANGE = 4.096; // [voltage range] = V
@@ -80,7 +78,6 @@ const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
 const int MIN_HALL_EFFECT = 2070;
 const int MIN_LIGHT_LEVEL = 500;
 const char *OUTPUT_FILE_NAME = "/onboardData.csv";
-const int SERVO_ROTATION_ANGLE = 90; // [angle] = degree
 const int VALUE_ACCURACY = 4;
 
 // Init objects to control peripherals
@@ -91,7 +88,6 @@ LSM9DS1TR lsm; // I2C
 I2CGPS gpsConnection; // I2C
 TinyGPSPlus gps;
 TMP117 tmp117;
-Servo myServo; // PWM
 
 dataContainer sensorData;
 // 0 - low power mode, 1 - normal mode
@@ -113,8 +109,6 @@ void setup() {
     ledStrip.setPixelColor(pixel, ledStrip.Color(0, 0, 255));
   }
   ledStrip.show();
-
-  myServo.attach(PIN_SERVO);
   
   SD.begin(PIN_SD_CS);
   if (!SD.exists(OUTPUT_FILE_NAME)) {
@@ -166,9 +160,6 @@ void loop() {
 
   if (!currentMode && isDescending()) {
     currentMode = 1;
-
-    // deploy parachute and blades
-    myServo.write(SERVO_ROTATION_ANGLE);
 
     for (int pixel = 0; pixel < LED_COUNT; pixel++) {
       ledStrip.setPixelColor(pixel, ledStrip.Color(0, 255, 0));

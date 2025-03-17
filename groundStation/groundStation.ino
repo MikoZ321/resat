@@ -117,8 +117,6 @@ void loop() {
     Serial.print("RSSI: ");
     Serial.print(LoRa.packetRssi());
 
-    receivedData.altitudePressure -= BASE_HEIGHT;
-
     Serial.print(" ");
     Serial.println(rawData);
  
@@ -151,7 +149,7 @@ String dataToJSON(int rssi) {
   jsonData += "\"accelX\":" + receivedData[14] + ",";
   jsonData += "\"accelY\":" + receivedData[15] + ",";
   jsonData += "\"accelZ\":" + receivedData[16] + ",";
-  jsonData += "\"rssi\":" + rssi + ",";
+  jsonData += "\"rssi\":" + String(rssi) + ",";
   jsonData += "\"angularSpeed\":" + receivedData[17];
   jsonData += "}";
   return jsonData;
@@ -203,7 +201,12 @@ void parseLoRaData(String rawData) {
     if (character == ';' || character == '\0') {
       buffer[bufIndex] = '\0';  // Null-terminate the buffer
       if (currentIndex < LORA_ITEM_COUNT) {  // Prevent buffer overflow
-        receivedData[currentIndex] = String(buffer);
+        if (currentIndex == 5) {
+          receivedData[currentIndex] = String(buffer - BASE_HEIGHT);
+        }
+        else {
+          receivedData[currentIndex] = String(buffer);
+        }
         currentIndex++;
       }
       bufIndex = 0;  // Reset buffer index
