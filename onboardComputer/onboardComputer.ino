@@ -158,8 +158,8 @@ void loop() {
 
   getSensorData();
 
-  // TODO: test when new hall sensor comes
-  // sensorData.angularSpeed = getAngularSpeed();
+  // TODO: make faster, takes 2-3 seconds has to take 1
+  sensorData.angularSpeed = getAngularSpeed();
 
   if (!currentMode && isDescending()) {
     currentMode = 1;
@@ -216,15 +216,19 @@ float digitalToAnalog(int digitalInput, float r1, float r2) {
 
 
 float getAngularSpeed() {
+  Serial.println(currentTime);
   float lastRevolutionTime = currentTime;
+  float period = 0;
   int revolutions = 0;
   bool peak = false;
 
-  while (millis() - currentTime < 500) {
+  while (millis() - currentTime < 500 && revolutions < 2) {
     float sensorData = analogRead(PIN_HALL_SENSOR);
+    
     if (sensorData > MIN_HALL_EFFECT && !peak) {
       peak = true;
       revolutions++;
+      period = millis() - lastRevolutionTime;
       lastRevolutionTime = millis();
     }
 
@@ -234,22 +238,15 @@ float getAngularSpeed() {
     delay(1);
   }
 
-  Serial.print(currentTime);
-  Serial.print(" ");
-  Serial.print(lastRevolutionTime);
-  Serial.print(" ");
-  Serial.print(revolutions);
-  Serial.print(" ");
-  Serial.println((lastRevolutionTime - currentTime) / revolutions);
-
-  return (revolutions > 0) * (60000.0/((lastRevolutionTime - currentTime) / revolutions));
+  if (revolutions == 0) {
+    return 0;
+  }
+  return 60000.0/(period);
 }
 
 
 void getSensorData() {
-  if (tmp117.dataReady()){
-    sensorData.temperature = tmp117.readTempC();
-  }
+  sensorData.temperature = tmp117.readTempC();
 
   sensorData.pressure = bme.readPressure() / 100.0F; // Convert to hPa
   sensorData.altitudePressure = bme.readAltitude(1013.25); // Absolute altitude
