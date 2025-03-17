@@ -2,6 +2,8 @@
 #include <Adafruit_BME280.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
+#include <array>
+#include <charconv>
 #include <ESP32Servo.h>
 #include <LoRa.h>
 #include <LSM9DS1TR-SOLDERED.h>
@@ -43,6 +45,7 @@ float digitalToAnalog(int digitalInput, int r1, int r2);
 float getAngularSpeed();
 void getSensorData();  
 bool isDescending();
+string toStringWithPrecision(double value);
 string vector3DToString(vector3D input, string seperator);
 
 // Pin definitions
@@ -78,6 +81,7 @@ const int MIN_HALL_EFFECT = 2070;
 const int MIN_LIGHT_LEVEL = 500;
 const char *OUTPUT_FILE_NAME = "/onboardData.csv";
 const int SERVO_ROTATION_ANGLE = 90; // [angle] = degree
+const int VALUE_ACCURACY = 4;
 
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
@@ -127,7 +131,6 @@ void setup() {
   LoRa.setPins(PIN_LORA_CS, PIN_LORA_RESET, PIN_LORA_DIO0);
   if (!LoRa.begin(LORA_FREQUENCY)){
     Serial.println("Starting LoRa failed!");
-    while (1);
   }
 
   LoRa.setSignalBandwidth(LORA_SIGNAL_BANDWITH);
@@ -200,12 +203,21 @@ void loop() {
 
 
 // this is a mess will try to fix
-string dataContainerToString(dataContainer input, string seperator) {
-  return (to_string(sensorData.tickCount) + seperator + to_string(sensorData.temperature) + seperator + to_string(sensorData.pressure) + seperator + 
-          to_string(sensorData.humidity) + seperator + to_string(sensorData.altitudeGPS) + seperator + to_string(sensorData.altitudePressure) + seperator + to_string(sensorData.latitude) + seperator + 
-          to_string(sensorData.longitude) + seperator + to_string(sensorData.lightLevel) + seperator + to_string(sensorData.batteryVoltage) + seperator + 
-          to_string(sensorData.motorOutputVoltage) + seperator + vector3DToString(sensorData.gyro, seperator) + seperator + vector3DToString(sensorData.acceleration, seperator) +
-          seperator + to_string(sensorData.angularSpeed));
+string dataContainerToString(dataContainer input, string separator) {
+  return (to_string(sensorData.tickCount) + separator +
+          toStringWithPrecision(sensorData.temperature) + separator +
+          toStringWithPrecision(sensorData.pressure) + separator +
+          toStringWithPrecision(sensorData.humidity) + separator +
+          toStringWithPrecision(sensorData.altitudeGPS) + separator +
+          toStringWithPrecision(sensorData.altitudePressure) + separator +
+          to_string(sensorData.latitude) + separator +  
+          to_string(sensorData.longitude) + separator + 
+          toStringWithPrecision(sensorData.lightLevel) + separator +
+          toStringWithPrecision(sensorData.batteryVoltage) + separator +
+          toStringWithPrecision(sensorData.motorOutputVoltage) + separator +
+          vector3DToString(sensorData.gyro, separator) + separator +
+          vector3DToString(sensorData.acceleration, separator) + separator +
+          toStringWithPrecision(sensorData.angularSpeed));
 }
 
 
@@ -286,7 +298,13 @@ bool isDescending() {
   return (previousAltitude - sensorData.altitudeGPS > MIN_ALTITUDE_DIFFERENCE) && (sensorData.lightLevel > MIN_LIGHT_LEVEL);
 }
 
+string toStringWithPrecision(double value) {
+  array<char, 16> buffer{};  // Buffer large enough for most double values
+  auto [ptr, ec] = to_chars(buffer.data(), buffer.data() + buffer.size(), value, chars_format::fixed, VALUE_ACCURACY);
+  return (ec == errc()) ? string(buffer.data(), ptr) : "NaN";
+}
+
 
 string vector3DToString(vector3D input, string seperator) {
-  return (to_string(input.x) + seperator + to_string(input.y) + seperator + to_string(input.z));
+  return (toStringWithPrecision(input.x) + seperator + toStringWithPrecision(input.y) + seperator + toStringWithPrecision(input.z));
 }

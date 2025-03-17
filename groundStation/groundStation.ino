@@ -114,11 +114,13 @@ void loop() {
     while (LoRa.available()) {
       rawData += (char)LoRa.read();
     }
-    Serial.println(LoRa.packetRssi());
+    Serial.print("RSSI: ");
+    Serial.print(LoRa.packetRssi());
 
     receivedData.altitudePressure -= BASE_HEIGHT;
 
-    //Serial.println(rawData);
+    Serial.print(" ");
+    Serial.println(rawData);
  
     parseLoRaData(rawData);
     String jsonData = dataToJSON(LoRa.packetRssi());
