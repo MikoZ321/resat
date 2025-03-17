@@ -8,10 +8,11 @@
 // Pin definitions
 #define PIN_LORA_CS 5     // LoRa radio chip select
 #define PIN_LORA_RESET 17 // LoRa radio reset
-#define PIN_LORA_DIO0 2   // Must be a hardware interrupt pin
+#define PIN_LORA_DIO0 14   // Must be a hardware interrupt pin
 
 // Customizable settings
 // Should be moved to a different document for consistency with onboardComputer
+#define BASE_HEIGHT 143
 #define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
 #define LORA_SPREADING_FACTOR 10 // also change in onboardComputer.ino
@@ -50,15 +51,13 @@ AsyncWebSocket ws("/ws"); // WebSocket endpoint
 // parsed data is stored in this str arr in the order of the dataContainer struct
 String receivedData[LORA_ITEM_COUNT];
 
-String dataToJSON(void);
+String dataToJSON(int rssi);
 void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 void sendWebSocketMessage(String message);
 void parseLoRaData(String rawData);
  
 void setup() {
   Serial.begin(9600);
-  while (!Serial)
-    ;
 
   WiFi.begin(SSID, PASSWORD);
   Serial.print("Connecting to Wi-Fi");
@@ -116,10 +115,13 @@ void loop() {
       rawData += (char)LoRa.read();
     }
     Serial.println(LoRa.packetRssi());
+
+    receivedData.altitudePressure -= BASE_HEIGHT;
+
     //Serial.println(rawData);
  
     parseLoRaData(rawData);
-    String jsonData = dataToJSON();
+    String jsonData = dataToJSON(LoRa.packetRssi());
 
     //Serial.println(jsonData);
     sendWebSocketMessage(jsonData);  
@@ -128,7 +130,7 @@ void loop() {
 }
 
 
-String dataToJSON(void) {
+String dataToJSON(int rssi) {
   String jsonData = "{";
   jsonData += "\"tickCount\":" + receivedData[0] + ",";
   jsonData += "\"temperature\":" + receivedData[1] + ",";
@@ -147,6 +149,7 @@ String dataToJSON(void) {
   jsonData += "\"accelX\":" + receivedData[14] + ",";
   jsonData += "\"accelY\":" + receivedData[15] + ",";
   jsonData += "\"accelZ\":" + receivedData[16] + ",";
+  jsonData += "\"rssi\":" + rssi + ",";
   jsonData += "\"angularSpeed\":" + receivedData[17];
   jsonData += "}";
   return jsonData;
