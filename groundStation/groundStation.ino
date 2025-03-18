@@ -15,7 +15,7 @@
 #define BASE_HEIGHT 143
 #define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
-#define LORA_SPREADING_FACTOR 10 // also change in onboardComputer.ino
+#define LORA_SPREADING_FACTOR 8 // also change in onboardComputer.ino
 #define LORA_ITEM_COUNT 18
 
 // Wi-Fi credentials
@@ -51,7 +51,7 @@ AsyncWebSocket ws("/ws"); // WebSocket endpoint
 // parsed data is stored in this str arr in the order of the dataContainer struct
 String receivedData[LORA_ITEM_COUNT];
 
-String dataToJSON(int rssi);
+String dataToJSON(void);
 void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 void sendWebSocketMessage(String message);
 void parseLoRaData(String rawData);
@@ -121,7 +121,7 @@ void loop() {
     Serial.println(rawData);
  
     parseLoRaData(rawData);
-    String jsonData = dataToJSON(LoRa.packetRssi());
+    String jsonData = dataToJSON();
 
     //Serial.println(jsonData);
     sendWebSocketMessage(jsonData);  
@@ -130,14 +130,14 @@ void loop() {
 }
 
 
-String dataToJSON(int rssi) {
+String dataToJSON(void) {
   String jsonData = "{";
   jsonData += "\"tickCount\":" + receivedData[0] + ",";
   jsonData += "\"temperature\":" + receivedData[1] + ",";
   jsonData += "\"pressure\":" + receivedData[2] + ",";
   jsonData += "\"humidity\":" + receivedData[3] + ",";
   jsonData += "\"altitudeGPS\":" + receivedData[4] + ",";
-  jsonData += "\"altitudePressure\":" + receivedData[5] + ",";
+  jsonData += "\"height\":" + receivedData[5] + ",";
   jsonData += "\"latitude\":" + receivedData[6] + ",";
   jsonData += "\"longitude\":" + receivedData[7] + ",";
   jsonData += "\"lightLevel\":" + receivedData[8] + ",";
@@ -149,8 +149,8 @@ String dataToJSON(int rssi) {
   jsonData += "\"accelX\":" + receivedData[14] + ",";
   jsonData += "\"accelY\":" + receivedData[15] + ",";
   jsonData += "\"accelZ\":" + receivedData[16] + ",";
-  jsonData += "\"rssi\":" + String(rssi) + ",";
-  jsonData += "\"angularSpeed\":" + receivedData[17];
+  jsonData += "\"angularSpeed\":" + receivedData[17] + ",";
+  jsonData += "\"rssi\":" + String(LoRa.packetRssi());
   jsonData += "}";
   return jsonData;
 }

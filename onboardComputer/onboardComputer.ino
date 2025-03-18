@@ -73,7 +73,7 @@ const string CSV_SEPERATOR = ";";
 const unsigned int DELAY_TIME = 1000; // [delay time] = ms
 const double LORA_FREQUENCY = 433E6; // also change in groundStation.ino
 const double LORA_SIGNAL_BANDWITH = 125E3; // also change in groundStation.ino
-const int LORA_SPREADING_FACTOR = 10; // also change in groundStation.ino
+const int LORA_SPREADING_FACTOR = 8; // also change in groundStation.ino
 const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
 const int MIN_HALL_EFFECT = 2070;
 const int MIN_LIGHT_LEVEL = 500;
