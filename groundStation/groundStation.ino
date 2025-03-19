@@ -13,10 +13,14 @@
 // Customizable settings
 // Should be moved to a different document for consistency with onboardComputer
 #define BASE_HEIGHT 135
+#define BASE_LATITUDE 0
+#define BASE_LONGITUDE 0
+#define EARTH_RADIUS 6371000
 #define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
 #define LORA_SPREADING_FACTOR 8 // also change in onboardComputer.ino
 #define LORA_ITEM_COUNT 18
+#define PI 3.141592653589793
 
 // Wi-Fi credentials
 #define SSID "Kontyner"
@@ -54,8 +58,10 @@ float previousHeight = 0;
 long previousTime = 0;
 
 String dataToJSON(void);
+double flatEarthDistance(double lat1, double lon1, float height);
 void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 void sendWebSocketMessage(String message);
+double toRadians(double angle);
 void parseLoRaData(String rawData);
  
 void setup() {
@@ -154,9 +160,18 @@ String dataToJSON(void) {
   jsonData += "\"accelZ\":" + receivedData[16] + ",";
   jsonData += "\"angularSpeed\":" + receivedData[17] + ",";
   jsonData += "\"descentRate\":" + String(previousHeight - (String(receivedData[5])).toFloat()) + ",";
+  jsonData += "\"distance\":" + String(flatEarthDistance((String(receivedData[6])).toFloat(), (String(receivedData[7])).toFloat(), (String(receivedData[5])).toFloat())) + ",";
   jsonData += "\"rssi\":" + String(LoRa.packetRssi());
   jsonData += "}";
   return jsonData;
+}
+
+
+double flatEarthDistance(double lat1, double lon1, float height) {
+  double avgLat = toRadians((lat1 + BASE_LATITUDE) / 2);
+  double dx = (toRadians(BASE_LONGITUDE - lon1)) * cos(avgLat) * EARTH_RADIUS;
+  double dy = (toRadians(BASE_LATITUDE - lat1)) * EARTH_RADIUS;
+  return sqrt(dx * dx + dy * dy + height * height); // [distance] = m
 }
 
 
@@ -188,6 +203,11 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsE
 // Send LoRa data to all WebSocket clients
 void sendWebSocketMessage(String message) {
   ws.textAll(message);
+}
+
+
+double toRadians(double angle) {
+  return angle * PI / 180.0;
 }
 
 

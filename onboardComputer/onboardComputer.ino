@@ -292,7 +292,7 @@ void getSensorData() {
 
 
 bool isDescending() {
-  return (previousAltitude - sensorData.altitudeGPS > MIN_ALTITUDE_DIFFERENCE) && (sensorData.lightLevel > MIN_LIGHT_LEVEL);
+  return (previousAltitude - sensorData.altitudePressure > MIN_ALTITUDE_DIFFERENCE) && (sensorData.lightLevel > MIN_LIGHT_LEVEL);
 }
 
 string toStringWithPrecision(double value) {

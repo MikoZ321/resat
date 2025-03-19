@@ -39,4 +39,5 @@ ws.onmessage = function(event) {
     document.getElementById("angularSpeed").innerText = data.angularSpeed;
     document.getElementById("rssi").innerText = data.rssi;
     document.getElementById("descentRate").innerText = data.descentRate;
+    document.getElementById("distance").innerText = data.distance;
 };

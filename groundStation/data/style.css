@@ -116,6 +116,7 @@ main {
 
 #map {
     width: 30vw;
+    height: 100%;
 }
 
 #coordinates {
