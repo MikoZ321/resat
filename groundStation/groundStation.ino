@@ -129,6 +129,7 @@ void loop() {
     sendWebSocketMessage(jsonData);  
   }
   ws.cleanupClients();
+  previousHeight = (String(receivedData[5])).toFloat();
 }
 
 
@@ -152,7 +153,7 @@ String dataToJSON(void) {
   jsonData += "\"accelY\":" + receivedData[15] + ",";
   jsonData += "\"accelZ\":" + receivedData[16] + ",";
   jsonData += "\"angularSpeed\":" + receivedData[17] + ",";
-  jsonData += "\"descentRate\":" + String((previousHeight - receivedData[5].toFloat())/(previousTime - receivedData[1].toDouble())) + ",";
+  jsonData += "\"descentRate\":" + String(previousHeight - (String(receivedData[5])).toFloat()) + ",";
   jsonData += "\"rssi\":" + String(LoRa.packetRssi());
   jsonData += "}";
   return jsonData;
