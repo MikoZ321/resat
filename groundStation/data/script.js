@@ -14,7 +14,6 @@ ws.onmessage = function(event) {
         document.getElementById("runtime").innerText = `${minutes} min ${seconds} s`;
     }
     document.getElementById("pressure").innerText = data.pressure;
-    document.getElementById("humidity").innerText = data.humidity;
     document.getElementById("altitude").innerText = data.altitudeGPS;
     document.getElementById("height").innerText = data.height;
     document.getElementById("latitude").innerText = data.latitude;

@@ -12,7 +12,7 @@
 
 // Customizable settings
 // Should be moved to a different document for consistency with onboardComputer
-#define BASE_HEIGHT 143
+#define BASE_HEIGHT 135
 #define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
 #define LORA_SPREADING_FACTOR 8 // also change in onboardComputer.ino
@@ -205,7 +205,7 @@ void parseLoRaData(String rawData) {
       buffer[bufIndex] = '\0';  // Null-terminate the buffer
       if (currentIndex < LORA_ITEM_COUNT) {  // Prevent buffer overflow
         if (currentIndex == 5) {
-          receivedData[currentIndex] = String(buffer - BASE_HEIGHT);
+          receivedData[currentIndex] = String((String(buffer)).toFloat() - BASE_HEIGHT);
         }
         else {
           receivedData[currentIndex] = String(buffer);
