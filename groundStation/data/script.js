@@ -3,7 +3,7 @@ var ws = new WebSocket("ws://" + window.location.host + "/ws");
 ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
     document.getElementById("temperature").innerText = data.temperature;
-    let seconds = int(data.time) / 1000.0;
+    let seconds = Number(data.time) / 1000.0;
 
     if (seconds < 60) {
         document.getElementById("runtime").innerText = `${seconds} s`;
@@ -12,7 +12,6 @@ ws.onmessage = function(event) {
         let minutes = (seconds - (seconds % 60)) / 60;
         seconds = seconds % 60;
         document.getElementById("runtime").innerText = `${minutes} min ${seconds} s`;
-
     }
     document.getElementById("pressure").innerText = data.pressure;
     document.getElementById("humidity").innerText = data.humidity;
