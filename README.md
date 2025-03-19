@@ -6,7 +6,7 @@ This project will use two seperate microcontrollers: one onboard the CanSat and 
 
 ### Onboard Computer
 The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will be connected to the following peripherals:
-* BME280 - atmospheric pressure and air humidity sensor
+* BMP581 - atmospheric pressure and air humidity sensor
 * TMP117 - temperature sensor
 * PA1010D - GPS module
 * LSM9DS1TR - accelerometer, magnetometer, and gyroscope
@@ -16,7 +16,6 @@ The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will 
 * GL5516 - photoresistor, used to determine if the CanSat is in the rocket or outside
 * Ra-02 - LoRa communication module, used to transmit data to the ground station
 * TF PUSH - TF card reader, used to write data to the micro-SD card onboard
-* Servo micro 9g - microservo, used to free the parachute compartment
 * Buzzer 2700Hz - buzzer, used to help locate the CanSat after landing
 * WS2812B (with 4 pixels) - LED strip, used to indicate the current mode of the CanSat
 
@@ -24,10 +23,10 @@ The onboard computer will be a costume-made PCB using the ESP-WROOM-32E it will 
 The ground station will consist of a smaller custom-made PCB, which will receive the data transmitted from the onboard computer via LoRa, save it onto a SD card, host a web server to display it in real time, and indicate where the antenna should be pointed for best signal reception.
 
 ## Setup Process
-This project was coded in Arduino IDE using the esp32 board library by Espressif (for a step-by-step setup process consult the link https://dronebotworkshop.com/esp32-intro/)
+This project was coded in Arduino IDE using the esp32 board library by Espressif (for a step-by-step setup process consult the [link](https://dronebotworkshop.com/esp32-intro/))
 
 Libraries used:
-* [Adafruit BME280](https://github.com/adafruit/Adafruit_BME280_Library)
+* [SparkFun BMP581](https://github.com/sparkfun/SparkFun_BMP581_Arduino_Library)
 * [SparkFun TMP117](https://github.com/sparkfun/SparkFun_TMP117_Arduino_Library)
 * [Sparkfun I2C GPS](https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library) 
 * [Tiny GPS Plus](https://github.com/mikalhart/TinyGPSPlus)
@@ -51,7 +50,6 @@ Aims:
 * Collect data from different sensors.
 * Encode the data to an onboard micro-SD card.
 * Transmit the data via Lo-Ra to the ground station.
-* Ensure that the parachute compartment (along with the parachute and blades) is released via servo.
 
 ![Flowchart of the onboard program flow](./schematics/softwareExecutionPath.png)
 

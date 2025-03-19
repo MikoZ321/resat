@@ -1,12 +1,13 @@
 #include <Adafruit_ADS1X15.h>
-#include <Adafruit_BME280.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_Sensor.h>
 #include <array>
 #include <charconv>
+#include <cmath>
 #include <LoRa.h>
 #include <LSM9DS1TR-SOLDERED.h>
 #include <SD.h>
+#include <SparkFun_BMP581_Arduino_Library.h>
 #include <SparkFun_I2C_GPS_Arduino_Library.h>
 #include <SparkFun_TMP117.h>
 #include <SPI.h>
@@ -83,7 +84,7 @@ const int VALUE_ACCURACY = 4;
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
 Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
-Adafruit_BME280 bme; // I2C
+BMP581 bmp; // I2C
 LSM9DS1TR lsm; // I2C
 I2CGPS gpsConnection; // I2C
 TinyGPSPlus gps;
@@ -132,7 +133,7 @@ void setup() {
   
   // init I2C for all peripherals
   ads.begin();
-  bme.begin(0x76);
+  bmp.beginI2C();
   gpsConnection.begin();
   lsm.begin();
   tmp117.begin(0x49);
@@ -251,8 +252,15 @@ float getAngularSpeed() {
 void getSensorData() {
   sensorData.temperature = tmp117.readTempC();
 
-  sensorData.pressure = bme.readPressure() / 100.0F; // Convert to hPa
-  sensorData.altitudePressure = bme.readAltitude(1013.25); // Absolute altitude
+  bmp5_sensor_data pressureData = {0,0};
+  int8_t err = bmp.getSensorData(&pressureData);
+
+  // Check whether data was acquired successfully
+  if(err == BMP5_OK)
+  {
+    sensorData.pressure = pressureData.pressure / 100.0;
+    sensorData.altitudePressure = 44330 * (1 - pow((sensorData.pressure/1013.25), (1/5.225)));
+  }
 
   while (gpsConnection.available()) //available() returns the number of new bytes available from the GPS module
   {
