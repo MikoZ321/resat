@@ -1,3 +1,7 @@
+const map = L.map('map').setView([37.7749, -122.4194], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+const marker = L.marker([37.7749, -122.4194]).addTo(map);
+
 var ws = new WebSocket("ws://" + window.location.host + "/ws");
 
 ws.onmessage = function(event) {
@@ -18,6 +22,12 @@ ws.onmessage = function(event) {
     document.getElementById("height").innerText = data.height;
     document.getElementById("latitude").innerText = data.latitude;
     document.getElementById("longitude").innerText = data.longitude;
+
+    let lat = parseFloat(data.latitude);
+    let lon = parseFloat(data.longitude);
+    map.setView([lat, lon], 13);
+    marker.setLatLng([lat, lon]);
+
     document.getElementById("batteryVoltage").innerText = data.batteryVoltage;
     document.getElementById("motorOutputVoltage").innerText = data.motorOutputVoltage;
     document.getElementById("gyroX").innerText = data.gyroX;

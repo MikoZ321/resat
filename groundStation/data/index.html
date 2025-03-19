@@ -3,7 +3,9 @@
 <head>
     <title>ReSAT Team Live Dashboard</title>
     <link rel="stylesheet" type="text/css" href="/style.css">
-    <script src="/script.js"></script>
+    <script defer src="/script.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
     <header>
@@ -71,7 +73,9 @@
         </div>
         <div class="horizontal-container large">
             <div class="vertical-container" id="gps">
-                <div class="horizontal-container" id="maps"></div>
+                <div class="horizontal-container" id="maps">
+                    <div id="map"></div>
+                </div>
                 <div class="horizontal-container" id="coordinates">
                     <div class="horizontal-container tiny">
                         <p>Lat</p>
