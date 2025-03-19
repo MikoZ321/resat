@@ -115,7 +115,7 @@ void setup() {
     outputFile = SD.open(OUTPUT_FILE_NAME, FILE_WRITE);
 
     // init header
-    outputFile.print("tickCount;temperature;pressure;humidity;altitudeGPS;altitudePressure;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
+    outputFile.print("tickCount;time;temperature;pressure;altitudeGPS;altitudePressure;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
     outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;angularSpeed");
 
     outputFile.close();

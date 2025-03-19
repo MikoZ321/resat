@@ -30,4 +30,5 @@ ws.onmessage = function(event) {
     document.getElementById("accelZ").innerText = data.accelZ;
     document.getElementById("angularSpeed").innerText = data.angularSpeed;
     document.getElementById("rssi").innerText = data.rssi;
+    document.getElementById("descentRate").innerText = data.descentRate;
 };

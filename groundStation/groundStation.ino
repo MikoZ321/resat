@@ -50,6 +50,8 @@ AsyncWebSocket ws("/ws"); // WebSocket endpoint
 
 // parsed data is stored in this str arr in the order of the dataContainer struct
 String receivedData[LORA_ITEM_COUNT];
+float previousHeight = 0;
+long previousTime = 0;
 
 String dataToJSON(void);
 void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
@@ -137,7 +139,7 @@ String dataToJSON(void) {
   jsonData += "\"temperature\":" + receivedData[2] + ",";
   jsonData += "\"pressure\":" + receivedData[3] + ",";
   jsonData += "\"altitudeGPS\":" + receivedData[4] + ",";
-  jsonData += "\"height\":" + receivedData[5] + ",";
+  jsonData += "\"height\":" + String(receivedData[5]) + ",";
   jsonData += "\"latitude\":" + receivedData[6] + ",";
   jsonData += "\"longitude\":" + receivedData[7] + ",";
   jsonData += "\"lightLevel\":" + receivedData[8] + ",";
@@ -150,6 +152,7 @@ String dataToJSON(void) {
   jsonData += "\"accelY\":" + receivedData[15] + ",";
   jsonData += "\"accelZ\":" + receivedData[16] + ",";
   jsonData += "\"angularSpeed\":" + receivedData[17] + ",";
+  jsonData += "\"descentRate\":" + String((previousHeight - receivedData[5].toFloat())/(previousTime - receivedData[1].toDouble())) + ",";
   jsonData += "\"rssi\":" + String(LoRa.packetRssi());
   jsonData += "}";
   return jsonData;
