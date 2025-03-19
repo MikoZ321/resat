@@ -67,7 +67,7 @@ main {
     padding: 20px;
 }
 
-#atmospheric, #status, #energy, #gps, #movement {
+#atmospheric, #status, #energy, #gps, #charts {
     margin: 5px;
     border-radius: 5%;
     border: 1px lightgray solid;
@@ -115,7 +115,7 @@ main {
 }
 
 #map {
-    width: 30vw;
+    width: calc(30vw - 40px);
     height: 100%;
 }
 
@@ -125,16 +125,18 @@ main {
 }
 
 #movement {
-    width: 40vw;
+    width: calc(30vw - 40px);
     padding: 0px;
 }
 
-#movement .vertical-container {
-    height: 25vh;
-}
 
 #movement .vertical-container .horizontal-container {
     padding: 0px;
+}
+
+#charts {
+    height: 100%;
+    width: 40vw;
 }
 
 h2 {
@@ -145,4 +147,13 @@ footer {
     width: 100vw;
     height: 7.5vh;
     background-color: var(--contrast);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+a {
+    font-style: normal;
+    color: var(--main);
+    text-decoration: none;
 }
