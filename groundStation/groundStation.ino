@@ -30,9 +30,9 @@
 
 struct dataContainer {
   long tickCount;
+  long time; // [time] = ms
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
-  float humidity; // [humidity] = % RH
   float altitudeGPS; // [altitude] = m
   float altitudePressure; // [altitude] = m
   float latitude; // [latitude] = degrees N
@@ -133,9 +133,9 @@ void loop() {
 String dataToJSON(void) {
   String jsonData = "{";
   jsonData += "\"tickCount\":" + receivedData[0] + ",";
-  jsonData += "\"temperature\":" + receivedData[1] + ",";
-  jsonData += "\"pressure\":" + receivedData[2] + ",";
-  jsonData += "\"humidity\":" + receivedData[3] + ",";
+  jsonData += "\"time\":" + receivedData[1] + ",";
+  jsonData += "\"temperature\":" + receivedData[2] + ",";
+  jsonData += "\"pressure\":" + receivedData[3] + ",";
   jsonData += "\"altitudeGPS\":" + receivedData[4] + ",";
   jsonData += "\"height\":" + receivedData[5] + ",";
   jsonData += "\"latitude\":" + receivedData[6] + ",";

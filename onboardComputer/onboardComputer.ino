@@ -25,9 +25,9 @@ struct vector3D {
 
 struct dataContainer {
   long tickCount;
+  long time; // [time] = ms
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
-  float humidity; // [humidity] = % RH
   float altitudeGPS; // [altitude] = m
   float altitudePressure; // [altitude] = m
   float latitude; // [latitude] = degrees N
@@ -79,7 +79,7 @@ const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
 const int MIN_HALL_EFFECT = 2070;
 const int MIN_LIGHT_LEVEL = 500;
 const char *OUTPUT_FILE_NAME = "/onboardData.csv";
-const int VALUE_ACCURACY = 4;
+const int VALUE_ACCURACY = 3;
 
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
@@ -94,7 +94,6 @@ dataContainer sensorData;
 // 0 - low power mode, 1 - normal mode
 // always starts in low power mode
 int currentMode = 0;
-unsigned long currentTime = 0;
 float previousAltitude = 0;
 File outputFile;
 
@@ -150,13 +149,12 @@ void setup() {
 
 
 void loop() {
-  currentTime = millis();
+  sensorData.time = millis();
   sensorData.tickCount++;
   previousAltitude = sensorData.altitudePressure;
 
   getSensorData();
 
-  // TODO: make faster, takes 2-3 seconds has to take 1
   sensorData.angularSpeed = getAngularSpeed();
 
   if (!currentMode && isDescending()) {
@@ -197,9 +195,9 @@ void loop() {
 // this is a mess will try to fix
 string dataContainerToString(dataContainer input, string separator) {
   return (to_string(sensorData.tickCount) + separator +
+          to_string(sensorData.time) + separator +
           toStringWithPrecision(sensorData.temperature) + separator +
           toStringWithPrecision(sensorData.pressure) + separator +
-          toStringWithPrecision(sensorData.humidity) + separator +
           toStringWithPrecision(sensorData.altitudeGPS) + separator +
           toStringWithPrecision(sensorData.altitudePressure) + separator +
           to_string(sensorData.latitude) + separator +  
@@ -220,13 +218,13 @@ float digitalToAnalog(int digitalInput, float r1, float r2) {
 
 
 float getAngularSpeed() {
-  Serial.println(currentTime);
-  float lastRevolutionTime = currentTime;
+  Serial.println(sensorData.time);
+  float lastRevolutionTime = sensorData.time;
   float period = 0;
   int revolutions = 0;
   bool peak = false;
 
-  while (millis() - currentTime < 500 && revolutions < 2) {
+  while (millis() - sensorData.time < 500 && revolutions < 2) {
     float sensorData = analogRead(PIN_HALL_SENSOR);
     
     if (sensorData > MIN_HALL_EFFECT && !peak) {
