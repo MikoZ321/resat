@@ -171,7 +171,7 @@ double flatEarthDistance(double lat1, double lon1, float height) {
   double avgLat = toRadians((lat1 + BASE_LATITUDE) / 2);
   double dx = (toRadians(BASE_LONGITUDE - lon1)) * cos(avgLat) * EARTH_RADIUS;
   double dy = (toRadians(BASE_LATITUDE - lat1)) * EARTH_RADIUS;
-  return sqrt(dx * dx + dy * dy + height * height); // [distance] = m
+  return sqrt(dx * dx + dy * dy + height * height)/1000.0; // [distance] = km
 }
 
 
