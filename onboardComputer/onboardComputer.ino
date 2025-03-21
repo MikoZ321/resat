@@ -68,6 +68,7 @@ const float BATTERY_R1 = 46.0; // [resistance] = kiloOhms
 const float BATTERY_R2 = 10.0; // [resistance] = kiloOhms
 const float MOTOR_R1 = 75.0; // [resistance] = kiloOhms
 const float MOTOR_R2 = 10.0; // [resistance] = kiloOhms
+const float MOTOR_CONSTANT = 1.56;
 
 // Customizable settings
 const string CSV_SEPERATOR = ";";
@@ -287,7 +288,7 @@ void getSensorData() {
   sensorData.acceleration.z = lsm.calcAccel(lsm.az);
 
   digitalValue = ads.readADC_SingleEnded(ADC_MOTOR);
-  sensorData.motorOutputVoltage = digitalToAnalog(digitalValue, MOTOR_R1, MOTOR_R2);
+  sensorData.motorOutputVoltage = MOTOR_CONSTANT * digitalToAnalog(digitalValue, MOTOR_R1, MOTOR_R2);
 }
 
 
