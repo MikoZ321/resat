@@ -58,3 +58,9 @@ A is the low-power mode and B is the normal mode.
 ![Schematic of the onboard data handling](./schematics/dataHandling.png)
 
 The blue components are inputs active for the entire runtime of the CanSat, data from the red sensors will only be collected while the CanSat is in normal mode, and the purple components are outputs.
+
+### Data Transfers
+
+![Flowchart of the data transfers](./schematics/dataTransmits.png)
+
+The data will be collected on the onboard computer and saved on the onboard SD-card, from there it will be sent via LoRa to the ground station, where it will be shared via a web socket connection to a locally hosted web server to display the results in real time, saved on a second SD-card, and sent to a PC via the Serial Monitor.
