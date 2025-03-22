@@ -39,7 +39,8 @@ struct dataContainer {
   float angularSpeed; // [angular speed] = RPM
 };
 
-string dataContainerToString(dataContainer input, string seperator);
+string dataContainerToStringSD(dataContainer input, string seperator);
+string dataContainerToStringLoRa(dataContainer input, string seperator);
 float digitalToAnalog(int digitalInput, int r1, int r2);
 float getAngularSpeed();
 void getSensorData();  
@@ -176,7 +177,7 @@ void loop() {
 
   // write data to SD 
   outputFile = SD.open(OUTPUT_FILE_NAME, FILE_APPEND);
-  outputFile.println(dataContainerToString(sensorData, CSV_SEPERATOR).c_str());
+  outputFile.println(dataContainerToStringSD(sensorData, CSV_SEPERATOR).c_str());
   outputFile.close();
   
   // send data
@@ -191,7 +192,7 @@ void loop() {
 
 
 // this is a mess will try to fix
-string dataContainerToString(dataContainer input, string separator) {
+string dataContainerToStringSD(dataContainer input, string separator) {
   return (to_string(sensorData.time / 1000) + separator +
           to_string(sensorData.temperature) + separator +
           to_string(sensorData.pressure) + separator +
@@ -216,7 +217,6 @@ string dataContainerToStringLoRa(dataContainer input, string separator) {
           to_string(sensorData.longitude) + separator + 
           toStringWithPrecision(sensorData.batteryVoltage) + separator +
           toStringWithPrecision(sensorData.motorOutputVoltage) + separator +
-          vector3DToString(sensorData.gyro, separator) + separator +
           vector3DToString(sensorData.acceleration, separator) + separator +
           toStringWithPrecision(sensorData.angularSpeed));
 }

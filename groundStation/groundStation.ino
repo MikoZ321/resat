@@ -20,7 +20,7 @@
 #define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
 #define LORA_SPREADING_FACTOR 8 // also change in onboardComputer.ino
-#define LORA_ITEM_COUNT 15
+#define LORA_ITEM_COUNT 12
 #define PI 3.141592653589793
 
 // Wi-Fi credentials
@@ -37,13 +37,11 @@ struct dataContainer {
   long time; // [time] = ms
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
-  float altitudeGPS; // [altitude] = m
   float altitudePressure; // [altitude] = m
   float latitude; // [latitude] = degrees N
   float longitude; // [longitude] = degrees E
   float batteryVoltage; // [voltage] = V
   float motorOutputVoltage; // [voltage] = V
-  vector3D gyro; // [gyro] = DPS
   vector3D acceleration; // [acceleration] = g
   float angularSpeed; // [angular speed] = RPM
 };*/
@@ -137,7 +135,7 @@ void loop() {
     sendWebSocketMessage(jsonData);  
   }
   ws.cleanupClients();
-  previousHeight = (String(receivedData[4])).toFloat();
+  previousHeight = currentHeight;
 }
 
 
@@ -152,13 +150,10 @@ String dataToJSON(void) {
   jsonData += "\"longitude\":" + receivedData[5] + ",";
   jsonData += "\"batteryVoltage\":" + receivedData[6] + ",";
   jsonData += "\"motorOutputVoltage\":" + receivedData[7] + ",";
-  jsonData += "\"gyroX\":" + receivedData[8] + ",";
-  jsonData += "\"gyroY\":" + receivedData[9] + ",";
-  jsonData += "\"gyroZ\":" + receivedData[10] + ",";
-  jsonData += "\"accelX\":" + receivedData[11] + ",";
-  jsonData += "\"accelY\":" + receivedData[12] + ",";
-  jsonData += "\"accelZ\":" + receivedData[13] + ",";
-  jsonData += "\"angularSpeed\":" + receivedData[14] + ",";
+  jsonData += "\"accelX\":" + receivedData[8] + ",";
+  jsonData += "\"accelY\":" + receivedData[9] + ",";
+  jsonData += "\"accelZ\":" + receivedData[10] + ",";
+  jsonData += "\"angularSpeed\":" + receivedData[11] + ",";
   jsonData += "\"descentRate\":" + String(previousHeight - currentHeight) + ",";
   jsonData += "\"distance\":" + String(flatEarthDistance((String(receivedData[4])).toFloat(), (String(receivedData[5])).toFloat(), currentHeight)) + ",";
   jsonData += "\"rssi\":" + String(LoRa.packetRssi());

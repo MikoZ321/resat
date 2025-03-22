@@ -110,9 +110,6 @@ ws.onmessage = function(event) {
 
     document.getElementById("batteryVoltage").innerText = `${data.batteryVoltage}V`;
     document.getElementById("motorOutputVoltage").innerText = `${data.motorOutputVoltage}V`;
-    document.getElementById("gyroX").innerText = data.gyroX;
-    document.getElementById("gyroY").innerText = data.gyroY;
-    document.getElementById("gyroZ").innerText = data.gyroZ;
     document.getElementById("accelX").innerText = data.accelX;
     document.getElementById("accelY").innerText = data.accelY;
     document.getElementById("accelZ").innerText = data.accelZ;
