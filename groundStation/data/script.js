@@ -2,6 +2,7 @@ const BASE_LATITUDE = 37.7749;
 const BASE_LONGITUDE = -122.4194;
 const ZOOM_LEVEL = 16;
 const CHART_ITEM_MAX = 20;
+const MAX_RANGE = 2833;
 
 const map = L.map('map').setView([BASE_LATITUDE, BASE_LONGITUDE], ZOOM_LEVEL);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -81,7 +82,7 @@ var ws = new WebSocket("ws://" + window.location.host + "/ws");
 
 ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
-    document.getElementById("temperature").innerText = `${data.temperature}°C`;
+    document.getElementById("temperature").innerText = `${data.temperature}*C`;
     let seconds = Number(data.time) / 1000.0;
 
     if (seconds < 60) {
@@ -124,4 +125,5 @@ ws.onmessage = function(event) {
     document.getElementById("rssi").innerText = data.rssi;
     document.getElementById("descentRate").innerText = `${data.descentRate}m/s`;
     document.getElementById("distance").innerText = `${data.distance}m`;
+    document.getElementById("range").innerText = `${MAX_RANGE - Number(data.distance)}m`
 };
