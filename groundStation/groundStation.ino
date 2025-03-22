@@ -19,7 +19,7 @@
 #define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
 #define LORA_SPREADING_FACTOR 8 // also change in onboardComputer.ino
-#define LORA_ITEM_COUNT 18
+#define LORA_ITEM_COUNT 17
 #define PI 3.141592653589793
 
 // Wi-Fi credentials
@@ -135,32 +135,31 @@ void loop() {
     sendWebSocketMessage(jsonData);  
   }
   ws.cleanupClients();
-  previousHeight = (String(receivedData[5])).toFloat();
+  previousHeight = (String(receivedData[4])).toFloat();
 }
 
 
 String dataToJSON(void) {
   String jsonData = "{";
-  jsonData += "\"tickCount\":" + receivedData[0] + ",";
-  jsonData += "\"time\":" + receivedData[1] + ",";
-  jsonData += "\"temperature\":" + receivedData[2] + ",";
-  jsonData += "\"pressure\":" + receivedData[3] + ",";
-  jsonData += "\"altitudeGPS\":" + receivedData[4] + ",";
-  jsonData += "\"height\":" + String(receivedData[5]) + ",";
-  jsonData += "\"latitude\":" + receivedData[6] + ",";
-  jsonData += "\"longitude\":" + receivedData[7] + ",";
-  jsonData += "\"lightLevel\":" + receivedData[8] + ",";
-  jsonData += "\"batteryVoltage\":" + receivedData[9] + ",";
-  jsonData += "\"motorOutputVoltage\":" + receivedData[10] + ",";
-  jsonData += "\"gyroX\":" + receivedData[11] + ",";
-  jsonData += "\"gyroY\":" + receivedData[12] + ",";
-  jsonData += "\"gyroZ\":" + receivedData[13] + ",";
-  jsonData += "\"accelX\":" + receivedData[14] + ",";
-  jsonData += "\"accelY\":" + receivedData[15] + ",";
-  jsonData += "\"accelZ\":" + receivedData[16] + ",";
-  jsonData += "\"angularSpeed\":" + receivedData[17] + ",";
-  jsonData += "\"descentRate\":" + String(previousHeight - (String(receivedData[5])).toFloat()) + ",";
-  jsonData += "\"distance\":" + String(flatEarthDistance((String(receivedData[6])).toFloat(), (String(receivedData[7])).toFloat(), (String(receivedData[5])).toFloat())) + ",";
+  jsonData += "\"time\":" + receivedData[0] + ",";
+  jsonData += "\"temperature\":" + receivedData[1] + ",";
+  jsonData += "\"pressure\":" + receivedData[2] + ",";
+  jsonData += "\"altitudeGPS\":" + receivedData[3] + ",";
+  jsonData += "\"height\":" + String(receivedData[4]) + ",";
+  jsonData += "\"latitude\":" + receivedData[5] + ",";
+  jsonData += "\"longitude\":" + receivedData[6] + ",";
+  jsonData += "\"lightLevel\":" + receivedData[7] + ",";
+  jsonData += "\"batteryVoltage\":" + receivedData[8] + ",";
+  jsonData += "\"motorOutputVoltage\":" + receivedData[9] + ",";
+  jsonData += "\"gyroX\":" + receivedData[10] + ",";
+  jsonData += "\"gyroY\":" + receivedData[11] + ",";
+  jsonData += "\"gyroZ\":" + receivedData[12] + ",";
+  jsonData += "\"accelX\":" + receivedData[13] + ",";
+  jsonData += "\"accelY\":" + receivedData[14] + ",";
+  jsonData += "\"accelZ\":" + receivedData[15] + ",";
+  jsonData += "\"angularSpeed\":" + receivedData[16] + ",";
+  jsonData += "\"descentRate\":" + String(previousHeight - (String(receivedData[4])).toFloat()) + ",";
+  jsonData += "\"distance\":" + String(flatEarthDistance((String(receivedData[5])).toFloat(), (String(receivedData[6])).toFloat(), (String(receivedData[4])).toFloat())) + ",";
   jsonData += "\"rssi\":" + String(LoRa.packetRssi());
   jsonData += "}";
   return jsonData;

@@ -24,7 +24,6 @@ struct vector3D {
 };
 
 struct dataContainer {
-  long tickCount;
   long time; // [time] = ms
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
@@ -99,7 +98,6 @@ float previousAltitude = 0;
 File outputFile;
 
 void setup() {
-  sensorData.tickCount = 0;
   // 115200 because of gps example
   Serial.begin(115200);
   Wire.begin();
@@ -116,7 +114,7 @@ void setup() {
     outputFile = SD.open(OUTPUT_FILE_NAME, FILE_WRITE);
 
     // init header
-    outputFile.print("tickCount;time;temperature;pressure;altitudeGPS;altitudePressure;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
+    outputFile.print("time;temperature;pressure;altitudeGPS;altitudePressure;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
     outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;angularSpeed");
 
     outputFile.close();
@@ -151,7 +149,6 @@ void setup() {
 
 void loop() {
   sensorData.time = millis();
-  sensorData.tickCount++;
   previousAltitude = sensorData.altitudePressure;
 
   getSensorData();
@@ -195,8 +192,7 @@ void loop() {
 
 // this is a mess will try to fix
 string dataContainerToString(dataContainer input, string separator) {
-  return (to_string(sensorData.tickCount) + separator +
-          to_string(sensorData.time) + separator +
+  return (to_string(sensorData.time / 1000) + separator +
           toStringWithPrecision(sensorData.temperature) + separator +
           toStringWithPrecision(sensorData.pressure) + separator +
           toStringWithPrecision(sensorData.altitudeGPS) + separator +
@@ -219,13 +215,12 @@ float digitalToAnalog(int digitalInput, float r1, float r2) {
 
 
 float getAngularSpeed() {
-  Serial.println(sensorData.time);
   float lastRevolutionTime = sensorData.time;
   float period = 0;
   int revolutions = 0;
   bool peak = false;
 
-  while (millis() - sensorData.time < 500 && revolutions < 2) {
+  while (millis() - sensorData.time < 200 && revolutions < 2) {
     float sensorData = analogRead(PIN_HALL_SENSOR);
     
     if (sensorData > MIN_HALL_EFFECT && !peak) {
