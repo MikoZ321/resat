@@ -114,7 +114,7 @@ void setup() {
     outputFile = SD.open(OUTPUT_FILE_NAME, FILE_WRITE);
 
     // init header
-    outputFile.print("time;temperature;pressure;altitudeGPS;altitudePressure;latitude;longitude;batteryVoltage;motorOutputVoltage;");
+    outputFile.print("time;temperature;pressure;altitudeGPS;altitudePressure;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
     outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;angularSpeed");
 
     outputFile.close();
@@ -181,7 +181,7 @@ void loop() {
   
   // send data
   LoRa.beginPacket();
-  LoRa.print(dataContainerToString(sensorData, CSV_SEPERATOR).c_str());
+  LoRa.print(dataContainerToStringLoRa(sensorData, CSV_SEPERATOR).c_str());
   LoRa.endPacket();
   
   while(millis() % DELAY_TIME) {
@@ -193,9 +193,24 @@ void loop() {
 // this is a mess will try to fix
 string dataContainerToString(dataContainer input, string separator) {
   return (to_string(sensorData.time / 1000) + separator +
+          to_string(sensorData.temperature) + separator +
+          to_string(sensorData.pressure) + separator +
+          to_string(sensorData.altitudeGPS) + separator +
+          to_string(sensorData.altitudePressure) + separator +
+          to_string(sensorData.latitude) + separator +  
+          to_string(sensorData.longitude) + separator + 
+          to_string(sensorData.lightLevel) + separator +
+          to_string(sensorData.batteryVoltage) + separator +
+          to_string(sensorData.motorOutputVoltage) + separator +
+          vector3DToString(sensorData.gyro, separator) + separator +
+          vector3DToString(sensorData.acceleration, separator) + separator +
+          to_string(sensorData.angularSpeed));
+}
+
+string dataContainerToStringLoRa(dataContainer input, string separator) {
+  return (to_string(sensorData.time / 1000) + separator +
           toStringWithPrecision(sensorData.temperature) + separator +
           toStringWithPrecision(sensorData.pressure) + separator +
-          toStringWithPrecision(sensorData.altitudeGPS) + separator +
           toStringWithPrecision(sensorData.altitudePressure) + separator +
           to_string(sensorData.latitude) + separator +  
           to_string(sensorData.longitude) + separator + 
