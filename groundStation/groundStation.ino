@@ -19,7 +19,7 @@
 #define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
 #define LORA_SPREADING_FACTOR 8 // also change in onboardComputer.ino
-#define LORA_ITEM_COUNT 17
+#define LORA_ITEM_COUNT 16
 #define PI 3.141592653589793
 
 // Wi-Fi credentials
@@ -33,7 +33,6 @@
 };
 
 struct dataContainer {
-  long tickCount;
   long time; // [time] = ms
   float temperature; // [temperature] = degrees Celcius
   float pressure; // [pressure] = hPa
@@ -41,7 +40,6 @@ struct dataContainer {
   float altitudePressure; // [altitude] = m
   float latitude; // [latitude] = degrees N
   float longitude; // [longitude] = degrees E
-  int lightLevel;
   float batteryVoltage; // [voltage] = V
   float motorOutputVoltage; // [voltage] = V
   vector3D gyro; // [gyro] = DPS
@@ -148,16 +146,15 @@ String dataToJSON(void) {
   jsonData += "\"height\":" + String(receivedData[4]) + ",";
   jsonData += "\"latitude\":" + receivedData[5] + ",";
   jsonData += "\"longitude\":" + receivedData[6] + ",";
-  jsonData += "\"lightLevel\":" + receivedData[7] + ",";
-  jsonData += "\"batteryVoltage\":" + receivedData[8] + ",";
-  jsonData += "\"motorOutputVoltage\":" + receivedData[9] + ",";
-  jsonData += "\"gyroX\":" + receivedData[10] + ",";
-  jsonData += "\"gyroY\":" + receivedData[11] + ",";
-  jsonData += "\"gyroZ\":" + receivedData[12] + ",";
-  jsonData += "\"accelX\":" + receivedData[13] + ",";
-  jsonData += "\"accelY\":" + receivedData[14] + ",";
-  jsonData += "\"accelZ\":" + receivedData[15] + ",";
-  jsonData += "\"angularSpeed\":" + receivedData[16] + ",";
+  jsonData += "\"batteryVoltage\":" + receivedData[7] + ",";
+  jsonData += "\"motorOutputVoltage\":" + receivedData[8] + ",";
+  jsonData += "\"gyroX\":" + receivedData[9] + ",";
+  jsonData += "\"gyroY\":" + receivedData[10] + ",";
+  jsonData += "\"gyroZ\":" + receivedData[11] + ",";
+  jsonData += "\"accelX\":" + receivedData[12] + ",";
+  jsonData += "\"accelY\":" + receivedData[13] + ",";
+  jsonData += "\"accelZ\":" + receivedData[14] + ",";
+  jsonData += "\"angularSpeed\":" + receivedData[15] + ",";
   jsonData += "\"descentRate\":" + String(previousHeight - (String(receivedData[4])).toFloat()) + ",";
   jsonData += "\"distance\":" + String(flatEarthDistance((String(receivedData[5])).toFloat(), (String(receivedData[6])).toFloat(), (String(receivedData[4])).toFloat())) + ",";
   jsonData += "\"rssi\":" + String(LoRa.packetRssi());
@@ -224,7 +221,7 @@ void parseLoRaData(String rawData) {
     if (character == ';' || character == '\0') {
       buffer[bufIndex] = '\0';  // Null-terminate the buffer
       if (currentIndex < LORA_ITEM_COUNT) {  // Prevent buffer overflow
-        if (currentIndex == 5) {
+        if (currentIndex == 4) {
           receivedData[currentIndex] = String((String(buffer)).toFloat() - BASE_HEIGHT);
         }
         else {

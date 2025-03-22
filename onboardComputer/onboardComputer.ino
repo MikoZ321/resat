@@ -114,7 +114,7 @@ void setup() {
     outputFile = SD.open(OUTPUT_FILE_NAME, FILE_WRITE);
 
     // init header
-    outputFile.print("time;temperature;pressure;altitudeGPS;altitudePressure;latitude;longitude;lightLevel;batteryVoltage;motorOutputVoltage;");
+    outputFile.print("time;temperature;pressure;altitudeGPS;altitudePressure;latitude;longitude;batteryVoltage;motorOutputVoltage;");
     outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;angularSpeed");
 
     outputFile.close();
@@ -199,7 +199,6 @@ string dataContainerToString(dataContainer input, string separator) {
           toStringWithPrecision(sensorData.altitudePressure) + separator +
           to_string(sensorData.latitude) + separator +  
           to_string(sensorData.longitude) + separator + 
-          toStringWithPrecision(sensorData.lightLevel) + separator +
           toStringWithPrecision(sensorData.batteryVoltage) + separator +
           toStringWithPrecision(sensorData.motorOutputVoltage) + separator +
           vector3DToString(sensorData.gyro, separator) + separator +
