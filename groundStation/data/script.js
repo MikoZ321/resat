@@ -12,46 +12,71 @@ const marker = L.marker([BASE_LATITUDE, BASE_LONGITUDE]).addTo(map);
 let heightCtx = document.getElementById('heightChart').getContext('2d');
 let voltageCtx = document.getElementById('voltageChart').getContext('2d');
 
-// Create the Height vs. Time Chart
-let heightChart = new Chart(heightCtx, {
+let heightChart = new Chart(document.getElementById('heightChart').getContext('2d'), {
     type: 'line',
     data: {
-        labels: [],  // Time labels (X-axis)
+        labels: [],
         datasets: [{
             label: 'Height (m)',
-            data: [],  // AltitudePressure (Y-axis)
+            data: [],
             borderColor: 'rgb(75, 192, 192)',
             borderWidth: 2,
+            pointRadius: 3, // Small points for readability
             fill: false
         }]
     },
     options: {
-        responsive: true,
+        responsive: true, // Ensures it resizes within the container
+        maintainAspectRatio: false, // Prevents forced aspect ratio
         scales: {
-            x: { title: { display: true, text: 'Time (s)' } },
-            y: { title: { display: true, text: 'Height (m)' } }
+            x: {
+                title: { display: true, text: 'Time' },
+                ticks: { maxRotation: 45, autoSkip: true } // Prevents label overlap
+            },
+            y: {
+                title: { display: true, text: 'Height (m)' },
+                min: 0,
+                max: 500
+            }
+        },
+        plugins: {
+            legend: { display: true },
+            tooltip: { enabled: true }
         }
     }
 });
 
-// Create the Angular Speed vs. Voltage Chart
-let voltageChart = new Chart(voltageCtx, {
+let voltageChart = new Chart(document.getElementById('voltageChart').getContext('2d'), {
     type: 'scatter',
     data: {
         datasets: [{
             label: 'Voltage vs Angular Speed',
-            data: [],  // Points will be { x: angularSpeed, y: voltage }
+            data: [],
             borderColor: 'rgb(255, 99, 132)',
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
             borderWidth: 2,
+            pointRadius: 4,
             showLine: true
         }]
     },
     options: {
-        responsive: true,
+        responsive: true, 
+        maintainAspectRatio: false,
         scales: {
-            x: { title: { display: true, text: 'Angular Speed (RPM)' } },
-            y: { title: { display: true, text: 'Voltage (V)' } }
+            x: {
+                title: { display: true, text: 'Angular Speed (RPM)' },
+                min: 0,
+                max: 6000
+            },
+            y: {
+                title: { display: true, text: 'Voltage (V)' },
+                min: 0,
+                max: 12
+            }
+        },
+        plugins: {
+            legend: { display: true },
+            tooltip: { enabled: true }
         }
     }
 });
@@ -83,7 +108,7 @@ var ws = new WebSocket("ws://" + window.location.host + "/ws");
 ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
     document.getElementById("temperature").innerText = `${data.temperature}*C`;
-    let seconds = Number(data.time) / 1000.0;
+    let seconds = Number(data.time);
 
     if (seconds < 60) {
         document.getElementById("runtime").innerText = `${seconds}s`;
