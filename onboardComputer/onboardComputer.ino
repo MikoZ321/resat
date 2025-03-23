@@ -61,7 +61,6 @@ const uint8_t PIN_LORA_RESET = 17;
 const uint8_t PIN_POWER_SWITCH = 15;
 const uint8_t PIN_SD_CS = 14;
 
-const unsigned int LED_COUNT = 4;
 const float ADC_VOLTAGE_RANGE = 4.096; // [voltage range] = V
 const float ADC_DIGITAL_RANGE = 32767.0;
 const float BATTERY_R1 = 46.0; // [resistance] = kiloOhms
@@ -105,9 +104,7 @@ void setup() {
 
   // show that the CanSat is powered on
   ledStrip.begin();
-  for (int pixel = 0; pixel < LED_COUNT; pixel++) {
-    ledStrip.setPixelColor(pixel, ledStrip.Color(0, 0, 255));
-  }
+  ledStrip.setPixelColor(1, ledStrip.Color(0, 0, 255));
   ledStrip.show();
   
   SD.begin(PIN_SD_CS);
@@ -159,9 +156,7 @@ void loop() {
   if (!currentMode && isDescending()) {
     currentMode = 1;
 
-    for (int pixel = 0; pixel < LED_COUNT; pixel++) {
-      ledStrip.setPixelColor(pixel, ledStrip.Color(0, 255, 0));
-    }
+    ledStrip.setPixelColor(1, ledStrip.Color(0, 255, 0));
     ledStrip.show();
   }
   else if (currentMode && !isDescending()) {
@@ -169,9 +164,7 @@ void loop() {
 
     digitalWrite(PIN_BUZZER, HIGH);
 
-    for (int pixel = 0; pixel < LED_COUNT; pixel++) {
-      ledStrip.setPixelColor(pixel, ledStrip.Color(0, 0, 255));
-    }
+    ledStrip.setPixelColor(1, ledStrip.Color(0, 0, 255));
     ledStrip.show();
   }
 
