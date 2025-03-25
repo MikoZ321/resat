@@ -83,7 +83,7 @@ const int VALUE_ACCURACY = 3;
 
 // Init objects to control peripherals
 Adafruit_ADS1115 ads; // I2C
-Adafruit_NeoPixel ledStrip(LED_COUNT, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel ledStrip(4, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
 BMP581 bmp; // I2C
 LSM9DS1TR lsm; // I2C
 I2CGPS gpsConnection; // I2C
