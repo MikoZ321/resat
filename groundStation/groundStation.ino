@@ -17,7 +17,7 @@
 #define BASE_LATITUDE 0
 #define BASE_LONGITUDE 0
 #define EARTH_RADIUS 6371000
-#define LORA_FREQUENCY 433E6 // also change in onboardComputer.ino
+#define LORA_FREQUENCY 4331E5 // also change in onboardComputer.ino
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
 #define LORA_SPREADING_FACTOR 8 // also change in onboardComputer.ino
 #define LORA_ITEM_COUNT 12

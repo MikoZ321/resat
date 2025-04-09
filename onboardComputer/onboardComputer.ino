@@ -72,7 +72,7 @@ const float MOTOR_CONSTANT = 1.56;
 // Customizable settings
 const string CSV_SEPERATOR = ";";
 const unsigned int DELAY_TIME = 1000; // [delay time] = ms
-const double LORA_FREQUENCY = 433E6; // also change in groundStation.ino
+const double LORA_FREQUENCY = 4331E5; // also change in groundStation.ino
 const double LORA_SIGNAL_BANDWITH = 125E3; // also change in groundStation.ino
 const int LORA_SPREADING_FACTOR = 8; // also change in groundStation.ino
 const int MIN_ALTITUDE_DIFFERENCE = 5; // [altitude difference] = m
