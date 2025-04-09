@@ -3,13 +3,15 @@
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 #include <LoRa.h>
+#include <SD.h>
 #include <SPI.h>
 #include <WiFi.h>
 
 // Pin definitions
 #define PIN_LORA_CS 5     // LoRa radio chip select
 #define PIN_LORA_RESET 17 // LoRa radio reset
-#define PIN_LORA_DIO0 14   // Must be a hardware interrupt pin
+#define PIN_LORA_DIO0 2   // Must be a hardware interrupt pin
+#define PIN_SD_CS 14
 
 // Customizable settings
 // Should be moved to a different document for consistency with onboardComputer
@@ -21,6 +23,7 @@
 #define LORA_SIGNAL_BANDWITH 125E3 // also change in onboardComputer.ino
 #define LORA_SPREADING_FACTOR 8 // also change in onboardComputer.ino
 #define LORA_ITEM_COUNT 12
+#define OUTPUT_FILE_NAME "ground.csv"
 #define PI 3.141592653589793
 
 // Wi-Fi credentials
@@ -54,6 +57,7 @@ String receivedData[LORA_ITEM_COUNT];
 float currentHeight = 0;
 float previousHeight = 0;
 long previousTime = 0;
+File outputFile;
 
 String dataToJSON(void);
 double flatEarthDistance(double lat1, double lon1, float height);
@@ -90,6 +94,16 @@ void setup() {
   LoRa.setSignalBandwidth(LORA_SIGNAL_BANDWITH);
   LoRa.setSpreadingFactor(LORA_SPREADING_FACTOR);
 
+  SD.begin(PIN_SD_CS);
+  if (!SD.exists(OUTPUT_FILE_NAME)) {
+    outputFile = SD.open(OUTPUT_FILE_NAME, FILE_WRITE);
+
+    // init header
+    outputFile.print("time;temperature;pressure;altitudeGPS;latitude;longitude;batteryVoltage;motorOutputVoltage;");
+    outputFile.println("accelerationX;accelerationY;accelerationZ;angularSpeed;rssi");
+    outputFile.close();
+  }
+
   // WebSocket setup
   ws.onEvent(onWebSocketEvent);
   server.addHandler(&ws);
@@ -120,14 +134,19 @@ void loop() {
     while (LoRa.available()) {
       rawData += (char)LoRa.read();
     }
-    Serial.print("RSSI: ");
-    Serial.print(LoRa.packetRssi());
+    
+    String currentRssi = String(LoRa.packetRssi());
 
-    Serial.print(" ");
-    Serial.println(rawData);
+    Serial.print(rawData);
+    Serial.print(";");
+    Serial.println(currentRssi);
  
     parseLoRaData(rawData);
     currentHeight = 44330 * (1 - pow((String(receivedData[2]).toFloat()/1013.25), (1/5.225))) - BASE_HEIGHT;
+
+    outputFile = SD.open(OUTPUT_FILE_NAME, FILE_APPEND);
+    outputFile.println(rawData + ";" + currentRssi);
+    outputFile.close();
 
     String jsonData = dataToJSON();
 
