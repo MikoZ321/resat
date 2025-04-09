@@ -94,6 +94,7 @@ dataContainer sensorData;
 // 0 - low power mode, 1 - normal mode
 // always starts in low power mode
 int currentMode = 0;
+bool cardPresent = false;
 float previousAltitude = 0;
 File outputFile;
 
@@ -116,6 +117,11 @@ void setup() {
     outputFile.println("gyroX;gyroY;gyroZ;accelerationX;accelerationY;accelerationZ;angularSpeed");
 
     outputFile.close();
+  }
+  if (SD.cardType() != CARD_NONE) {
+    cardPresent = true;
+    ledStrip.setPixelColor(2, ledStrip.Color(255, 0, 0));
+    ledStrip.show();
   }
   
   // communication setup
@@ -165,6 +171,17 @@ void loop() {
     digitalWrite(PIN_BUZZER, HIGH);
 
     ledStrip.setPixelColor(1, ledStrip.Color(0, 0, 255));
+    ledStrip.show();
+  }
+
+  if (cardPresent && SD.cardType() == CARD_NONE) {
+    cardPresent = false;
+    ledStrip.setPixelColor(2, 0);
+    ledStrip.show();
+  } 
+  else if (!cardPresent && SD.cardType() != CARD_NONE) {
+    cardPresent = true;
+    ledStrip.setPixelColor(2, ledStrip.Color(255, 0, 0));
     ledStrip.show();
   }
 
