@@ -1,3 +1,4 @@
+#include <Adafruit_NeoPixel.h>
 #include <AsyncTCP.h>
 #include <cmath>
 #include <ESPAsyncWebServer.h>
@@ -8,6 +9,7 @@
 #include <WiFi.h>
 
 // Pin definitions
+#define PIN_LED_STRIP 26
 #define PIN_LORA_CS 5     // LoRa radio chip select
 #define PIN_LORA_RESET 17 // LoRa radio reset
 #define PIN_LORA_DIO0 2   // Must be a hardware interrupt pin
@@ -51,6 +53,7 @@ struct dataContainer {
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws"); // WebSocket endpoint
+Adafruit_NeoPixel ledStrip(4, PIN_LED_STRIP, NEO_GRB + NEO_KHZ800);
 
 // parsed data is stored in this str arr in the order of the dataContainer struct
 String receivedData[LORA_ITEM_COUNT];
@@ -58,6 +61,8 @@ float currentHeight = 0;
 float previousHeight = 0;
 long previousTime = 0;
 File outputFile;
+bool wifiConnected = false;
+bool sdInserted = false;
 
 String dataToJSON(void);
 double flatEarthDistance(double lat1, double lon1, float height);
@@ -69,6 +74,10 @@ void parseLoRaData(String rawData);
 void setup() {
   Serial.begin(9600);
 
+  ledStrip.begin();
+  ledStrip.setPixelColor(1, ledStrip.Color(0, 0, 255));
+  ledStrip.show();
+
   WiFi.begin(SSID, PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -76,6 +85,9 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("\nConnected to Wi-Fi, IP: " + WiFi.localIP().toString());
+  wifiConnected = true;
+  ledStrip.setPixelColor(3, ledStrip.Color(0, 255, 0));
+  ledStrip.show();
 
   if (!LittleFS.begin(true)) {
     Serial.println("An error occurred while mounting LittleFS.");
@@ -103,6 +115,9 @@ void setup() {
     outputFile.println("accelerationX;accelerationY;accelerationZ;angularSpeed;rssi");
     outputFile.close();
   }
+  sdInserted = true;
+  ledStrip.setPixelColor(2, ledStrip.Color(255, 0, 0));
+  ledStrip.show();
 
   // WebSocket setup
   ws.onEvent(onWebSocketEvent);
@@ -152,6 +167,29 @@ void loop() {
 
     //Serial.println(jsonData);
     sendWebSocketMessage(jsonData);  
+
+    // display status
+    if (sdInserted && SD.cardType() == CARD_NONE) {
+      sdInserted = false;
+      ledStrip.setPixelColor(2, 0);
+      ledStrip.show();
+    } 
+    else if (!sdInserted && SD.cardType() != CARD_NONE) {
+      sdInserted = true;
+      ledStrip.setPixelColor(2, ledStrip.Color(255, 0, 0));
+      ledStrip.show();
+    }
+
+    if (wifiConnected && WiFi.status() != WL_CONNECTED) {
+      wifiConnected = false;
+      ledStrip.setPixelColor(3, 0);
+      ledStrip.show();
+    }
+    else if (!wifiConnected && WiFi.status() == WL_CONNECTED) {
+      wifiConnected = true;
+      ledStrip.setPixelColor(3, ledStrip.Color(0, 255, 0));
+      ledStrip.show();
+    }
   }
   ws.cleanupClients();
   previousHeight = currentHeight;
