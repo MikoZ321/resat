@@ -95,6 +95,8 @@ dataContainer sensorData;
 // always starts in low power mode
 int currentMode = 0;
 bool cardPresent = false;
+bool buzzing = false;
+bool landed = false;
 float previousAltitude = 0;
 File outputFile;
 
@@ -167,6 +169,7 @@ void loop() {
   }
   else if (currentMode && !isDescending()) {
     currentMode = 0;
+    landed = true;
 
     digitalWrite(PIN_BUZZER, HIGH);
 
@@ -196,7 +199,16 @@ void loop() {
   LoRa.endPacket();
   
   while(millis() % DELAY_TIME) {
-    ;
+    if (landed) {
+      if (buzzing) {
+        noTone(PIN_BUZZER);
+        buzzing = false;
+      }
+      else {
+        tone(PIN_BUZZER, 2000);
+        buzzing = true;
+      }
+    };
   }
 }
 
