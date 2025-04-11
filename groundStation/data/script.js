@@ -4,6 +4,8 @@ const ZOOM_LEVEL = 16;
 const CHART_ITEM_MAX = 20;
 const MAX_RANGE = 2833;
 
+let heightChartActive = true;
+
 const map = L.map('map').setView([BASE_LATITUDE, BASE_LONGITUDE], ZOOM_LEVEL);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 const marker = L.marker([BASE_LATITUDE, BASE_LONGITUDE]).addTo(map);
@@ -36,7 +38,7 @@ let heightChart = new Chart(document.getElementById('heightChart').getContext('2
             y: {
                 title: { display: true, text: 'Height (m)' },
                 min: 0,
-                max: 500
+                max: 2500
             }
         },
         plugins: {
@@ -102,6 +104,19 @@ function updateVoltageChart(angularSpeed, voltage) {
     voltageChart.data.datasets[0].data.push({ x: angularSpeed, y: voltage });
     voltageChart.update();
 }
+
+document.getElementById("title").addEventListener("click", function() {
+    if (heightChartActive) {
+        heightChartActive = false;
+        document.getElementById("heightChart").style = "display:none;";
+        document.getElementById("voltageChart").style = "";
+    }
+    else {
+        heightChartActive = true;
+        document.getElementById("heightChart").style = "";
+        document.getElementById("voltageChart").style = "display:none;";
+    }
+});
 
 var ws = new WebSocket("ws://" + window.location.host + "/ws");
 

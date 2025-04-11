@@ -33,9 +33,10 @@ header {
     color: var(--main);
 }
 
-header h1 {
+#title {
     font-family: cyberFreight;
     background-color: var(--contrast);
+    cursor: pointer;
 }
 
 main {
