@@ -36,7 +36,6 @@ header {
 #title {
     font-family: cyberFreight;
     background-color: var(--contrast);
-    cursor: pointer;
 }
 
 main {
@@ -92,6 +91,10 @@ main {
     width: 40vw;
     height: 100%;
     padding: 0px;
+}
+
+#chartToggle {
+    cursor: pointer;
 }
 
 .horizontal-container.tiny {

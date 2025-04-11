@@ -105,7 +105,7 @@ function updateVoltageChart(angularSpeed, voltage) {
     voltageChart.update();
 }
 
-document.getElementById("title").addEventListener("click", function() {
+document.getElementById("chartToggle").addEventListener("click", function() {
     if (heightChartActive) {
         heightChartActive = false;
         document.getElementById("heightChart").style = "display:none;";
