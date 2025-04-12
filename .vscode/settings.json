@@ -3,5 +3,6 @@
         "unordered_map": "cpp",
         "xstring": "cpp",
         "string": "cpp"
-    }
+    },
+    "idf.pythonInstallPath": "C:\\Users\\01234\\.espressif\\tools\\idf-python\\3.11.2\\python.exe"
 }

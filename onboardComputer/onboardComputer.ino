@@ -198,17 +198,18 @@ void loop() {
   LoRa.print(dataContainerToStringLoRa(sensorData, CSV_SEPERATOR).c_str());
   LoRa.endPacket();
   
+  if (landed) {
+    if (buzzing) {
+      noTone(PIN_BUZZER);
+      buzzing = false;
+    }
+    else {
+      tone(PIN_BUZZER, 2000);
+      buzzing = true;
+    }
+  }
+  
   while(millis() % DELAY_TIME) {
-    if (landed) {
-      if (buzzing) {
-        noTone(PIN_BUZZER);
-        buzzing = false;
-      }
-      else {
-        tone(PIN_BUZZER, 2000);
-        buzzing = true;
-      }
-    };
   }
 }
 
